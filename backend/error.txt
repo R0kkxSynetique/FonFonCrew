@@ -1,0 +1,27 @@
+Error connecting to DB or Prisma Validation: PrismaClientValidationError: 
+Invalid `prisma.scheduleSlot.create()` invocation:
+
+{
+  data: {
+    event_id: 1,
+    title: "Test title",
+    ~~~~~
+    description: null,
+    start_time: new Date("2026-03-10T14:48:29.933Z"),
+    end_time: new Date("2026-03-10T14:48:29.933Z"),
+    capacity: 5,
+    requirements: null,
+?   id?: Int,
+?   subscriptions?: SubscriptionUncheckedCreateNestedManyWithoutScheduleInput
+  }
+}
+
+Unknown argument `title`. Available options are marked with ?.
+    at Nn (C:\Users\ben19\Documents\Github\FonFonCrew\backend\node_modules\@prisma\client\runtime\library.js:29:1363)
+    at ei.handleRequestError (C:\Users\ben19\Documents\Github\FonFonCrew\backend\node_modules\@prisma\client\runtime\library.js:121:6911)
+    at ei.handleAndLogRequestError (C:\Users\ben19\Documents\Github\FonFonCrew\backend\node_modules\@prisma\client\runtime\library.js:121:6593)
+    at ei.request (C:\Users\ben19\Documents\Github\FonFonCrew\backend\node_modules\@prisma\client\runtime\library.js:121:6300)
+    at async a (C:\Users\ben19\Documents\Github\FonFonCrew\backend\node_modules\@prisma\client\runtime\library.js:130:9551)
+    at async main (file:///C:/Users/ben19/Documents/Github/FonFonCrew/backend/test-create-slot.js:11:3) {
+  clientVersion: '6.19.2'
+}

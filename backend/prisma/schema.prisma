@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPERADMIN
+  ORGANIZER
+  VOLUNTEER
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  firstname     String
+  lastname      String
+  birthday      DateTime?
+  email         String         @unique
+  password_hash String
+  phone         String?
+  role          Role           @default(VOLUNTEER)
+  events        Event[]        @relation("OrganizerEvents")
+  subscriptions Subscription[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Event {
+  id            Int            @id @default(autoincrement())
+  name          String
+  description   String?
+  start_date    DateTime
+  end_date      DateTime
+  location_name String?
+  location_lat  Float?
+  location_lng  Float?
+  organizer_id  Int
+  organizer     User           @relation("OrganizerEvents", fields: [organizer_id], references: [id])
+  schedules     ScheduleSlot[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model ScheduleSlot {
+  id            Int            @id @default(autoincrement())
+  event_id      Int
+  event         Event          @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  title         String         @default("Volunteer Shift")
+  description   String?
+  start_time    DateTime
+  end_time      DateTime
+  capacity      Int
+  requirements  String?
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id               Int          @id @default(autoincrement())
+  user_id          Int
+  user             User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  schedule_slot_id Int
+  schedule         ScheduleSlot @relation(fields: [schedule_slot_id], references: [id], onDelete: Cascade)
+  createdAt        DateTime     @default(now())
+  
+  @@unique([user_id, schedule_slot_id])
+}
