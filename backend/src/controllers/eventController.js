@@ -47,7 +47,12 @@ export const getEventById = async (req, res) => {
       where: { id: parseInt(id) },
       include: {
         organizer: { select: { firstname: true, lastname: true, email: true, phone: true } },
-        schedules: { orderBy: { start_time: 'asc' } }
+        schedules: { 
+          orderBy: { start_time: 'asc' },
+          include: {
+            subscriptions: { select: { user_id: true } }
+          }
+        }
       }
     });
     if (!event) return res.status(404).json({ error: 'Event not found' });

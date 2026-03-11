@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateEvent from './pages/CreateEvent';
 import ManageEvent from './pages/ManageEvent';
+import EventDetails from './pages/EventDetails';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/create-event" element={<CreateEvent />} />
             <Route path="/manage-event/:eventId" element={<ManageEvent />} />
+            <Route path="/event/:eventId" element={<EventDetails />} />
           </Routes>
         </main>
       </div>

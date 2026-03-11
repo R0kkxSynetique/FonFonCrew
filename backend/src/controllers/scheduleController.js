@@ -82,8 +82,8 @@ export const unsubscribeFromSlot = async (req, res) => {
 
     res.json({ message: 'Unsubscribed successfully' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Failed to unsubscribe' });
+    console.error("Unsubscribe error:", error);
+    res.status(500).json({ error: error.message || 'Failed to unsubscribe' });
   }
 };
 
@@ -115,5 +115,64 @@ export const getSlotAttendees = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to fetch attendees' });
+  }
+};
+
+// Organizer updating a schedule slot
+export const updateScheduleSlot = async (req, res) => {
+  try {
+    const { slotId } = req.params;
+    const { title, description, start_time, end_time, capacity, requirements } = req.body;
+    
+    const slot = await prisma.scheduleSlot.findUnique({
+      where: { id: parseInt(slotId) },
+      include: { event: true }
+    });
+
+    if (!slot) return res.status(404).json({ error: 'Slot not found' });
+    if (slot.event.organizer_id !== req.user.userId && req.user.role !== 'SUPERADMIN') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const updatedSlot = await prisma.scheduleSlot.update({
+      where: { id: parseInt(slotId) },
+      data: {
+        title,
+        description,
+        start_time: start_time ? new Date(start_time) : undefined,
+        end_time: end_time ? new Date(end_time) : undefined,
+        capacity: capacity ? parseInt(capacity) : undefined,
+        requirements
+      }
+    });
+
+    res.json(updatedSlot);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to update schedule slot' });
+  }
+};
+
+// Organizer deleting a schedule slot
+export const deleteScheduleSlot = async (req, res) => {
+  try {
+    const { slotId } = req.params;
+    
+    const slot = await prisma.scheduleSlot.findUnique({
+      where: { id: parseInt(slotId) },
+      include: { event: true }
+    });
+
+    if (!slot) return res.status(404).json({ error: 'Slot not found' });
+    if (slot.event.organizer_id !== req.user.userId && req.user.role !== 'SUPERADMIN') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    await prisma.scheduleSlot.delete({ where: { id: parseInt(slotId) } });
+    
+    res.json({ message: 'Slot deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to delete schedule slot' });
   }
 };
