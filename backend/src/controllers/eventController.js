@@ -97,6 +97,14 @@ export const updateEvent = async (req, res) => {
 export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    const event = await prisma.event.findUnique({ where: { id: parseInt(id) } });
+    if (!event) return res.status(404).json({ error: 'Event not found' });
+    
+    if (event.organizer_id !== req.user.userId && req.user.role !== 'SUPERADMIN') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
     await prisma.event.delete({ where: { id: parseInt(id) } });
     res.json({ message: 'Event deleted successfully' });
   } catch (error) {

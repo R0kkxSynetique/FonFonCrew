@@ -32,6 +32,9 @@ const Navbar = () => {
           <>
             <span style={{ color: 'var(--text-secondary)' }}>Hello, {user?.firstname}</span>
             <Link to="/dashboard" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}>Dashboard</Link>
+            {user?.role === 'SUPERADMIN' && (
+              <Link to="/users" className="btn" style={{ padding: '0.4rem 0.8rem' }}>Users</Link>
+            )}
             <button onClick={handleLogout} className="btn" style={{ padding: '0.4rem 0.8rem' }}>
               <LogOut size={16} /> Logout
             </button>

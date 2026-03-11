@@ -6,6 +6,7 @@ import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/authRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import scheduleRoutes from './routes/scheduleRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/users', userRoutes);
 
 // Routes
 app.get('/api/health', (req, res) => {

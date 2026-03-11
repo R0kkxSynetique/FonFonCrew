@@ -114,7 +114,7 @@ export default function EventDetails() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
            <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>{event.name}</h1>
            {canManage && (
-             <Link to={`/manage-event/${event.id}`} className="btn btn-primary">
+             <Link to={`/events/${event.id}/edit`} className="btn btn-primary">
                Manage Event
              </Link>
            )}
@@ -219,7 +219,7 @@ export default function EventDetails() {
                       )
                     )}
                     {canManage && (
-                      <Link to={`/manage-event/${event.id}`} className="btn" style={{ width: '100%', textAlign: 'center', display: 'block' }}>
+                      <Link to={`/events/${event.id}/edit`} className="btn" style={{ width: '100%', textAlign: 'center', display: 'block' }}>
                          Manage Shift
                       </Link>
                     )}
