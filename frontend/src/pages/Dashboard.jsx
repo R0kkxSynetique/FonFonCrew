@@ -40,7 +40,7 @@ export default function Dashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Dashboard</h1>
         {['ORGANIZER', 'SUPERADMIN'].includes(user?.role) && (
-          <Link to="/create-event" className="btn btn-primary">
+          <Link to="/events/new" className="btn btn-primary">
             <Plus size={18} /> Create Event
           </Link>
         )}
@@ -53,7 +53,7 @@ export default function Dashboard() {
               key={event.id} 
               className="card" 
               style={{ cursor: 'pointer', transition: 'transform var(--transition-fast), box-shadow var(--transition-fast)' }}
-              onClick={() => navigate(`/event/${event.id}`)}
+              onClick={() => navigate(`/events/${event.id}`)}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.2)';

@@ -11,7 +11,8 @@ router.put('/:slotId', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), up
 router.delete('/:slotId', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), deleteScheduleSlot);
 
 // Accessible by any authenticated user for signing up/down
-router.post('/:slotId/subscribe', verifyToken, subscribeToSlot);
-router.delete('/:slotId/unsubscribe', verifyToken, unsubscribeFromSlot);
+// Accessible by any authenticated user for signing up/down
+router.post('/:slotId/subscriptions', verifyToken, subscribeToSlot);
+router.delete('/:slotId/subscriptions', verifyToken, unsubscribeFromSlot);
 
 export default router;

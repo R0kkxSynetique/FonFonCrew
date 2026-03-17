@@ -23,9 +23,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
-            <Route path="/create-event" element={<CreateEvent />} />
+            <Route path="/events/new" element={<CreateEvent />} />
             <Route path="/events/:eventId/edit" element={<ManageEvent />} />
-            <Route path="/event/:eventId" element={<EventDetails />} />
+            <Route path="/events/:eventId" element={<EventDetails />} />
             <Route path="/users" element={<UserManagement />} />
           </Routes>
         </main>

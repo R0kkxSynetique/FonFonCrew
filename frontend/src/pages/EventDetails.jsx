@@ -49,7 +49,7 @@ export default function EventDetails() {
         navigate('/login');
         return;
       }
-      await axios.post(`http://localhost:3001/api/schedules/${slotId}/subscribe`, {}, {
+      await axios.post(`http://localhost:3001/api/schedules/${slotId}/subscriptions`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       showNotification('Successfully subscribed!', 'success');
@@ -76,7 +76,7 @@ export default function EventDetails() {
         navigate('/login');
         return;
       }
-      await axios.delete(`http://localhost:3001/api/schedules/${slotId}/unsubscribe`, {
+      await axios.delete(`http://localhost:3001/api/schedules/${slotId}/subscriptions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setHoveredSlot(null);

@@ -31,7 +31,7 @@ export default function ManageEvent() {
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (!user || (user.id !== res.data.organizer_id && user.role !== 'SUPERADMIN')) {
          alert('You do not have permission to manage this event.');
-         navigate(`/event/${eventId}`);
+         navigate(`/events/${eventId}`);
          return;
       }
 
