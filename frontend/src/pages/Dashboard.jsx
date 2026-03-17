@@ -52,15 +52,13 @@ export default function Dashboard() {
             <div 
               key={event.id} 
               className="card" 
-              style={{ cursor: 'pointer', transition: 'transform var(--transition-fast), box-shadow var(--transition-fast)' }}
+              style={{ cursor: 'pointer', transition: 'box-shadow var(--transition-fast)' }}
               onClick={() => navigate(`/events/${event.id}`)}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.2)';
                 e.currentTarget.style.borderColor = 'var(--accent-color)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
                 e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
                 e.currentTarget.style.borderColor = 'var(--border-color)';
               }}
