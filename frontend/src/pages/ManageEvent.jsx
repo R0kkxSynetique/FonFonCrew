@@ -141,43 +141,6 @@ export default function ManageEvent() {
   if (loading) return <div style={{ textAlign: 'center', marginTop: '3rem' }}>Loading Event...</div>;
   if (!event) return <div style={{ textAlign: 'center', marginTop: '3rem' }}>Event not found</div>;
 
-  const SlotForm = ({ onSubmit, onCancel, submitText }) => (
-    <form onSubmit={onSubmit} style={{ backgroundColor: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-        <div>
-          <label className="form-label">Slot Title</label>
-          <input type="text" className="input-field" required value={slotFormData.title} onChange={e => setSlotFormData({...slotFormData, title: e.target.value})} placeholder="E.g., Setup Team" />
-        </div>
-        <div>
-          <label className="form-label">Description (Optional)</label>
-          <input type="text" className="input-field" value={slotFormData.description} onChange={e => setSlotFormData({...slotFormData, description: e.target.value})} placeholder="Duties" />
-        </div>
-      </div>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px', gap: '1rem', marginBottom: '0.5rem' }}>
-        <div>
-          <label className="form-label">Start Time</label>
-          <input type="datetime-local" className="input-field" required value={slotFormData.start_time} onChange={e => setSlotFormData({...slotFormData, start_time: e.target.value})} />
-        </div>
-        <div>
-          <label className="form-label">End Time</label>
-          <input type="datetime-local" className="input-field" required value={slotFormData.end_time} onChange={e => setSlotFormData({...slotFormData, end_time: e.target.value})} />
-        </div>
-        <div>
-          <label className="form-label">Capacity</label>
-          <input type="number" className="input-field" required min="1" value={slotFormData.capacity} onChange={e => setSlotFormData({...slotFormData, capacity: e.target.value})} />
-        </div>
-      </div>
-      <div style={{ marginBottom: '1rem' }}>
-        <label className="form-label">Requirements (Optional)</label>
-        <input type="text" className="input-field" value={slotFormData.requirements} onChange={e => setSlotFormData({...slotFormData, requirements: e.target.value})} placeholder="Skills needed" />
-      </div>
-      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-        <button type="button" onClick={onCancel} className="btn"><X size={16} /> Cancel</button>
-        <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
-      </div>
-    </form>
-  );
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
@@ -250,13 +213,25 @@ export default function ManageEvent() {
       </div>
 
       {isAddingSlot && (
-        <SlotForm onSubmit={handleCreateSlot} onCancel={() => setIsAddingSlot(false)} submitText="Create Slot" />
+        <SlotForm 
+          onSubmit={handleCreateSlot} 
+          onCancel={() => setIsAddingSlot(false)} 
+          submitText="Create Slot" 
+          formData={slotFormData}
+          setFormData={setSlotFormData}
+        />
       )}
 
       {event.schedules.map(slot => (
         <div key={slot.id}>
           {editingSlotId === slot.id ? (
-            <SlotForm onSubmit={handleUpdateSlot} onCancel={() => setEditingSlotId(null)} submitText="Save Slot" />
+            <SlotForm 
+              onSubmit={handleUpdateSlot} 
+              onCancel={() => setEditingSlotId(null)} 
+              submitText="Save Slot" 
+              formData={slotFormData}
+              setFormData={setSlotFormData}
+            />
           ) : (
             <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-color)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
@@ -307,3 +282,79 @@ export default function ManageEvent() {
     </div>
   );
 }
+
+const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => (
+  <form onSubmit={onSubmit} style={{ backgroundColor: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+      <div>
+        <label className="form-label">Slot Title</label>
+        <input 
+          type="text" 
+          className="input-field" 
+          required 
+          value={formData.title} 
+          onChange={e => setFormData({...formData, title: e.target.value})} 
+          placeholder="E.g., Setup Team" 
+        />
+      </div>
+      <div>
+        <label className="form-label">Description (Optional)</label>
+        <input 
+          type="text" 
+          className="input-field" 
+          value={formData.description} 
+          onChange={e => setFormData({...formData, description: e.target.value})} 
+          placeholder="Duties" 
+        />
+      </div>
+    </div>
+    
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px', gap: '1rem', marginBottom: '0.5rem' }}>
+      <div>
+        <label className="form-label">Start Time</label>
+        <input 
+          type="datetime-local" 
+          className="input-field" 
+          required 
+          value={formData.start_time} 
+          onChange={e => setFormData({...formData, start_time: e.target.value})} 
+        />
+      </div>
+      <div>
+        <label className="form-label">End Time</label>
+        <input 
+          type="datetime-local" 
+          className="input-field" 
+          required 
+          value={formData.end_time} 
+          onChange={e => setFormData({...formData, end_time: e.target.value})} 
+        />
+      </div>
+      <div>
+        <label className="form-label">Capacity</label>
+        <input 
+          type="number" 
+          className="input-field" 
+          required 
+          min="1" 
+          value={formData.capacity} 
+          onChange={e => setFormData({...formData, capacity: parseInt(e.target.value) || 0})} 
+        />
+      </div>
+    </div>
+    <div style={{ marginBottom: '1rem' }}>
+      <label className="form-label">Requirements (Optional)</label>
+      <input 
+        type="text" 
+        className="input-field" 
+        value={formData.requirements} 
+        onChange={e => setFormData({...formData, requirements: e.target.value})} 
+        placeholder="Skills needed" 
+      />
+    </div>
+    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+      <button type="button" onClick={onCancel} className="btn"><X size={16} /> Cancel</button>
+      <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
+    </div>
+  </form>
+);
