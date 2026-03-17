@@ -20,6 +20,9 @@ export default function ManageEvent() {
   const [editingSlotId, setEditingSlotId] = useState(null);
   const [slotFormData, setSlotFormData] = useState({ title: '', description: '', start_time: '', end_time: '', capacity: 5, requirements: '' });
 
+  // Confirmation Modal State
+  const [confirmDelete, setConfirmDelete] = useState({ show: false, type: null, id: null, title: '' });
+
   useEffect(() => {
     fetchEventDetails();
   }, [eventId]);
@@ -62,7 +65,6 @@ export default function ManageEvent() {
   };
 
   const handleDeleteEvent = async () => {
-    if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) return;
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`http://localhost:3001/api/events/${eventId}`, { headers: { Authorization: `Bearer ${token}` } });
@@ -109,14 +111,27 @@ export default function ManageEvent() {
   };
 
   const handleDeleteSlot = async (slotId) => {
-    if (!window.confirm('Delete this slot?')) return;
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`http://localhost:3001/api/schedules/${slotId}`, { headers: { Authorization: `Bearer ${token}` } });
       fetchEventDetails();
     } catch (err) {
+      console.error('Delete failed:', err.response?.data || err.message);
       alert('Failed to delete slot');
     }
+  };
+
+  const triggerDeleteConfirm = (type, id, title) => {
+    setConfirmDelete({ show: true, type, id, title });
+  };
+
+  const handleConfirmDelete = () => {
+    if (confirmDelete.type === 'event') {
+      handleDeleteEvent();
+    } else if (confirmDelete.type === 'slot') {
+      handleDeleteSlot(confirmDelete.id);
+    }
+    setConfirmDelete({ show: false, type: null, id: null, title: '' });
   };
 
   const openEditSlot = (slot) => {
@@ -154,7 +169,7 @@ export default function ManageEvent() {
               <Edit2 size={16} /> Edit Event
             </button>
           )}
-          <button onClick={handleDeleteEvent} className="btn btn-danger">
+          <button onClick={() => triggerDeleteConfirm('event', eventId, event.name)} className="btn btn-danger">
             <Trash2 size={16} /> Delete
           </button>
         </div>
@@ -247,7 +262,7 @@ export default function ManageEvent() {
                   </span>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button onClick={() => openEditSlot(slot)} className="btn" style={{ padding: '0.3rem', border: 'none' }} title="Edit Slot"><Edit2 size={16} /></button>
-                    <button onClick={() => handleDeleteSlot(slot.id)} className="btn btn-danger" style={{ padding: '0.3rem', border: 'none' }} title="Delete Slot"><Trash2 size={16} /></button>
+                    <button onClick={() => triggerDeleteConfirm('slot', slot.id, slot.title)} className="btn btn-danger" style={{ padding: '0.3rem', border: 'none' }} title="Delete Slot"><Trash2 size={16} /></button>
                   </div>
                 </div>
               </div>
@@ -279,6 +294,13 @@ export default function ManageEvent() {
           )}
         </div>
       ))}
+      <ConfirmModal 
+        show={confirmDelete.show} 
+        onClose={() => setConfirmDelete({ show: false, type: null, id: null, title: '' })} 
+        onConfirm={handleConfirmDelete}
+        title={confirmDelete.type === 'event' ? 'Delete Event' : 'Delete Slot'}
+        message={`Are you sure you want to delete "${confirmDelete.title}"? This action cannot be undone.`}
+      />
     </div>
   );
 }
@@ -358,3 +380,44 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
     </div>
   </form>
 );
+
+const ConfirmModal = ({ show, onClose, onConfirm, title, message }) => {
+  if (!show) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+      backdropFilter: 'blur(4px)'
+    }}>
+      <div className="card" style={{ maxWidth: '400px', width: '90%', padding: '2rem', textAlign: 'center' }}>
+        <div style={{ 
+          width: '64px', 
+          height: '64px', 
+          backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+          borderRadius: '50%', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          margin: '0 auto 1.5rem' 
+        }}>
+          <Trash2 size={32} color="var(--danger-color)" />
+        </div>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{title}</h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{message}</p>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+          <button onClick={onClose} className="btn" style={{ flex: 1 }}>Cancel</button>
+          <button onClick={onConfirm} className="btn btn-danger" style={{ flex: 1 }}>Delete</button>
+        </div>
+      </div>
+    </div>
+  );
+};
