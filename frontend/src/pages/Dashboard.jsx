@@ -11,16 +11,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-    
-    if (!token || !storedUser) {
-      navigate('/login');
-      return;
-    }
     setUser(storedUser);
     fetchEvents();
-  }, [navigate]);
+  }, []);
 
   const fetchEvents = async () => {
     try {

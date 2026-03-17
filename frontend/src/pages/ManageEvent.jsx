@@ -29,7 +29,7 @@ export default function ManageEvent() {
       const res = await axios.get(`http://localhost:3001/api/events/${eventId}`);
       
       const user = JSON.parse(localStorage.getItem('user') || 'null');
-      if (!user || (user.id !== res.data.organizer_id && user.role !== 'SUPERADMIN')) {
+      if (res.data.organizer_id !== user.id && user.role !== 'SUPERADMIN') {
          alert('You do not have permission to manage this event.');
          navigate(`/events/${eventId}`);
          return;

@@ -12,6 +12,10 @@ import ManageEvent from './pages/ManageEvent';
 import EventDetails from './pages/EventDetails';
 import UserManagement from './pages/UserManagement';
 
+// Auth Guards
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PublicRoute from './components/auth/PublicRoute';
+
 function App() {
   return (
     <Router>
@@ -19,14 +23,32 @@ function App() {
         <Navbar />
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard/*" element={<Dashboard />} />
-            <Route path="/events/new" element={<CreateEvent />} />
-            <Route path="/events/:eventId/edit" element={<ManageEvent />} />
+            {/* Public Routes - Landing page redirects if logged in */}
+            <Route element={<PublicRoute />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
+
+            {/* Public View Routes - Always accessible */}
             <Route path="/events/:eventId" element={<EventDetails />} />
-            <Route path="/users" element={<UserManagement />} />
+
+            {/* Private Routes - Require Authentication */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard/*" element={<Dashboard />} />
+            </Route>
+
+            {/* Organizer/Admin Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['ORGANIZER']} />}>
+              <Route path="/events/new" element={<CreateEvent />} />
+              <Route path="/events/:eventId/edit" element={<ManageEvent />} />
+            </Route>
+
+            {/* SuperAdmin Only Routes */}
+            <Route element={<ProtectedRoute allowedRoles={[]} />}> 
+              {/* Note: ProtectedRoute inherently allows SUPERADMIN if allowedRoles is empty or restricted */}
+              <Route path="/users" element={<UserManagement />} />
+            </Route>
           </Routes>
         </main>
       </div>

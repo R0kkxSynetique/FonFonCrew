@@ -1,18 +1,7 @@
-import { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { CalendarDays, Users, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    if (token && user) {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-
   return (
     <div style={{ textAlign: 'center', marginTop: '4rem' }}>
       <h1 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '1rem' }}>
