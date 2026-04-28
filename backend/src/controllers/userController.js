@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -22,6 +23,91 @@ export const getAllUsers = async (req, res) => {
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+// Create a new user
+export const createUser = async (req, res) => {
+  try {
+    const { firstname, lastname, email, password, role } = req.body;
+    
+    if (!firstname || !lastname || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists with this email' });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        firstname,
+        lastname,
+        email,
+        password_hash,
+        role: role || 'VOLUNTEER',
+      },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      }
+    });
+
+    res.status(201).json(user);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+};
+
+// Update user details
+export const updateUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { firstname, lastname, email, role, password } = req.body;
+
+    const dataToUpdate = {};
+    if (firstname) dataToUpdate.firstname = firstname;
+    if (lastname) dataToUpdate.lastname = lastname;
+    if (email) dataToUpdate.email = email;
+    if (role) {
+      const validRoles = ['VOLUNTEER', 'ORGANIZER', 'SUPERADMIN'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ error: 'Invalid role provided' });
+      }
+      dataToUpdate.role = role;
+    }
+    
+    if (password) {
+      dataToUpdate.password_hash = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(userId) },
+      data: dataToUpdate,
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        email: true,
+        role: true,
+      }
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
+    res.status(500).json({ error: 'Failed to update user' });
   }
 };
 

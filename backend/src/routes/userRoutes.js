@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { verifyToken, requireRole } from '../middleware/auth.js';
-import { getAllUsers, updateUserRole, deleteUser } from '../controllers/userController.js';
+import { getAllUsers, createUser, updateUser, updateUserRole, deleteUser } from '../controllers/userController.js';
 
 const router = Router();
 
@@ -9,6 +9,8 @@ router.use(verifyToken);
 router.use(requireRole(['SUPERADMIN']));
 
 router.get('/', getAllUsers);
+router.post('/', createUser);
+router.put('/:userId', updateUser);
 router.put('/:userId/role', updateUserRole);
 router.delete('/:userId', deleteUser);
 
