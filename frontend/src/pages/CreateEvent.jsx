@@ -19,6 +19,7 @@ export default function CreateEvent() {
     setSlots([...slots, { 
       title: '', 
       description: '', 
+      location: '',
       start_time: formData.start_date || '', 
       end_time: formData.end_date || '', 
       capacity: 5, 
@@ -145,6 +146,11 @@ export default function CreateEvent() {
                 <label className="form-label">Slot Description (Optional)</label>
                 <textarea className="input-field" rows="2" value={slot.description} onChange={e => handleSlotChange(index, 'description', e.target.value)} placeholder="Brief explanation of duties"></textarea>
               </div>
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label className="form-label">On-site Location (Optional)</label>
+              <input type="text" className="input-field" value={slot.location || ''} onChange={e => handleSlotChange(index, 'location', e.target.value)} placeholder="E.g., Front Gate, Registration Desk" />
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px', gap: '1rem', marginBottom: '0.5rem' }}>

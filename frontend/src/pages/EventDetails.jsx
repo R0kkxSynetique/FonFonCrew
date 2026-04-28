@@ -163,6 +163,11 @@ export default function EventDetails() {
                       <Clock size={16} /> 
                       {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
                     </div>
+                    {slot.location && (
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <MapPin size={16} /> {slot.location}
+                      </div>
+                    )}
                     {slot.description && <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
                     {slot.requirements && (
                       <div style={{ fontSize: '0.9rem', backgroundColor: 'var(--bg-surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'inline-block', marginTop: '0.5rem' }}>

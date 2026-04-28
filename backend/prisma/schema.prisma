@@ -50,6 +50,7 @@ model ScheduleSlot {
   event         Event          @relation(fields: [event_id], references: [id], onDelete: Cascade)
   title         String         @default("Volunteer Shift")
   description   String?
+  location      String?
   start_time    DateTime
   end_time      DateTime
   capacity      Int

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 // Create a schedule slot for an event
 export const createScheduleSlot = async (req, res) => {
   try {
-    const { event_id, title, description, start_time, end_time, capacity, requirements } = req.body;
+    const { event_id, title, description, location, start_time, end_time, capacity, requirements } = req.body;
     
     // Verify event ownership
     const event = await prisma.event.findUnique({ where: { id: parseInt(event_id) } });
@@ -19,6 +19,7 @@ export const createScheduleSlot = async (req, res) => {
         event_id: parseInt(event_id),
         title: title || 'Volunteer Shift',
         description: description || null,
+        location: location || null,
         start_time: new Date(start_time),
         end_time: new Date(end_time),
         capacity: parseInt(capacity),
@@ -122,7 +123,7 @@ export const getSlotAttendees = async (req, res) => {
 export const updateScheduleSlot = async (req, res) => {
   try {
     const { slotId } = req.params;
-    const { title, description, start_time, end_time, capacity, requirements } = req.body;
+    const { title, description, location, start_time, end_time, capacity, requirements } = req.body;
     
     const slot = await prisma.scheduleSlot.findUnique({
       where: { id: parseInt(slotId) },
@@ -139,6 +140,7 @@ export const updateScheduleSlot = async (req, res) => {
       data: {
         title,
         description,
+        location,
         start_time: start_time ? new Date(start_time) : undefined,
         end_time: end_time ? new Date(end_time) : undefined,
         capacity: capacity ? parseInt(capacity) : undefined,

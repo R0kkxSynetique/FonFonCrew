@@ -25,7 +25,7 @@ export default function ManageEvent() {
   // Add/Edit Slot State
   const [isAddingSlot, setIsAddingSlot] = useState(false);
   const [editingSlotId, setEditingSlotId] = useState(null);
-  const [slotFormData, setSlotFormData] = useState({ title: '', description: '', start_time: '', end_time: '', capacity: 5, requirements: '' });
+  const [slotFormData, setSlotFormData] = useState({ title: '', description: '', location: '', start_time: '', end_time: '', capacity: 5, requirements: '' });
 
   // Confirmation Modal State
   const [confirmDelete, setConfirmDelete] = useState({ show: false, type: null, id: null, title: '' });
@@ -163,6 +163,7 @@ export default function ManageEvent() {
     setSlotFormData({
       title: slot.title,
       description: slot.description || '',
+      location: slot.location || '',
       start_time: toLocalDatetimeLocal(slot.start_time),
       end_time: toLocalDatetimeLocal(slot.end_time),
       capacity: slot.capacity,
@@ -176,6 +177,7 @@ export default function ManageEvent() {
     setSlotFormData({ 
       title: '', 
       description: '', 
+      location: '',
       start_time: event ? toLocalDatetimeLocal(event.start_date) : '', 
       end_time: event ? toLocalDatetimeLocal(event.end_date) : '', 
       capacity: 5, 
@@ -380,6 +382,17 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
           placeholder="Duties" 
         ></textarea>
       </div>
+    </div>
+
+    <div style={{ marginBottom: '1rem' }}>
+      <label className="form-label">On-site Location (Optional)</label>
+      <input 
+        type="text" 
+        className="input-field" 
+        value={formData.location || ''} 
+        onChange={e => setFormData({...formData, location: e.target.value})} 
+        placeholder="E.g., Front Gate, Registration Desk" 
+      />
     </div>
     
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px', gap: '1rem', marginBottom: '0.5rem' }}>
