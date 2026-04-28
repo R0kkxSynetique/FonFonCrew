@@ -12,11 +12,15 @@ export default function CreateEvent() {
     end_date: '',
     location_name: ''
   });
-  const [slots, setSlots] = useState([{ title: '', description: '', start_time: '', end_time: '', capacity: 5, requirements: '' }]);
+  const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleAddSlot = () => {
     setSlots([...slots, { title: '', description: '', start_time: '', end_time: '', capacity: 5, requirements: '' }]);
+  };
+
+  const handleRemoveSlot = (indexToRemove) => {
+    setSlots(slots.filter((_, index) => index !== indexToRemove));
   };
 
   const handleSlotChange = (index, field, value) => {
@@ -93,8 +97,9 @@ export default function CreateEvent() {
         </h3>
 
         {slots.map((slot, index) => (
-          <div key={index} style={{ backgroundColor: 'var(--bg-color)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', border: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          <div key={index} style={{ backgroundColor: 'var(--bg-color)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', border: '1px solid var(--border-color)', position: 'relative' }}>
+            <button type="button" onClick={() => handleRemoveSlot(index)} style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.8rem' }} aria-label="Remove Slot">✖</button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem', marginTop: '1rem' }}>
               <div>
                 <label className="form-label">Slot Title</label>
                 <input type="text" className="input-field" required value={slot.title} onChange={e => handleSlotChange(index, 'title', e.target.value)} placeholder="E.g., Morning Shift Setup" />
