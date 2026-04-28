@@ -4,6 +4,13 @@ import axios from 'axios';
 import { Users, ArrowLeft, Trash2, Edit2, Plus, X, Save } from 'lucide-react';
 import { format } from 'date-fns';
 
+const toLocalDatetimeLocal = (isoString) => {
+  if (!isoString) return '';
+  const dateObj = new Date(isoString);
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+  return new Date(dateObj - tzOffset).toISOString().slice(0, 16);
+};
+
 export default function ManageEvent() {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -42,8 +49,8 @@ export default function ManageEvent() {
       setEditEventData({
         name: res.data.name,
         description: res.data.description || '',
-        start_date: res.data.start_date.slice(0, 16),
-        end_date: res.data.end_date.slice(0, 16),
+        start_date: toLocalDatetimeLocal(res.data.start_date),
+        end_date: toLocalDatetimeLocal(res.data.end_date),
         location_name: res.data.location_name || '',
       });
       
@@ -72,6 +79,24 @@ export default function ManageEvent() {
     } catch (err) {
       alert('Failed to delete event');
     }
+  };
+
+  const handleEventStartDateChange = (e) => {
+    const newStartDate = e.target.value;
+    setEditEventData(prev => {
+      const newData = { ...prev, start_date: newStartDate };
+      if (newStartDate) {
+        const startDateObj = new Date(newStartDate);
+        const endDateObj = prev.end_date ? new Date(prev.end_date) : null;
+        
+        if (!prev.end_date || (endDateObj && endDateObj < startDateObj)) {
+          startDateObj.setHours(startDateObj.getHours() + 1);
+          const tzOffset = startDateObj.getTimezoneOffset() * 60000;
+          newData.end_date = new Date(startDateObj - tzOffset).toISOString().slice(0, 16);
+        }
+      }
+      return newData;
+    });
   };
 
   const handleUpdateEvent = async (e) => {
@@ -138,8 +163,8 @@ export default function ManageEvent() {
     setSlotFormData({
       title: slot.title,
       description: slot.description || '',
-      start_time: slot.start_time.slice(0, 16),
-      end_time: slot.end_time.slice(0, 16),
+      start_time: toLocalDatetimeLocal(slot.start_time),
+      end_time: toLocalDatetimeLocal(slot.end_time),
       capacity: slot.capacity,
       requirements: slot.requirements || ''
     });
@@ -148,7 +173,14 @@ export default function ManageEvent() {
   };
 
   const openAddSlot = () => {
-    setSlotFormData({ title: '', description: '', start_time: '', end_time: '', capacity: 5, requirements: '' });
+    setSlotFormData({ 
+      title: '', 
+      description: '', 
+      start_time: event ? toLocalDatetimeLocal(event.start_date) : '', 
+      end_time: event ? toLocalDatetimeLocal(event.end_date) : '', 
+      capacity: 5, 
+      requirements: '' 
+    });
     setIsAddingSlot(true);
     setEditingSlotId(null);
   };
@@ -189,7 +221,7 @@ export default function ManageEvent() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
               <label className="form-label">Start Date</label>
-              <input type="datetime-local" className="input-field" required value={editEventData.start_date} onChange={e => setEditEventData({...editEventData, start_date: e.target.value})} />
+              <input type="datetime-local" className="input-field" required value={editEventData.start_date} onChange={handleEventStartDateChange} />
             </div>
             <div className="form-group">
               <label className="form-label">End Date</label>
@@ -305,8 +337,27 @@ export default function ManageEvent() {
   );
 }
 
-const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => (
-  <form onSubmit={onSubmit} style={{ backgroundColor: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
+const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => {
+  const handleStartTimeChange = (e) => {
+    const newStartTime = e.target.value;
+    setFormData(prev => {
+      const newData = { ...prev, start_time: newStartTime };
+      if (newStartTime) {
+        const startDateObj = new Date(newStartTime);
+        const endDateObj = prev.end_time ? new Date(prev.end_time) : null;
+        
+        if (!prev.end_time || (endDateObj && endDateObj < startDateObj)) {
+          startDateObj.setHours(startDateObj.getHours() + 1);
+          const tzOffset = startDateObj.getTimezoneOffset() * 60000;
+          newData.end_time = new Date(startDateObj - tzOffset).toISOString().slice(0, 16);
+        }
+      }
+      return newData;
+    });
+  };
+
+  return (
+    <form onSubmit={onSubmit} style={{ backgroundColor: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
       <div>
         <label className="form-label">Slot Title</label>
@@ -339,7 +390,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
           className="input-field" 
           required 
           value={formData.start_time} 
-          onChange={e => setFormData({...formData, start_time: e.target.value})} 
+          onChange={handleStartTimeChange} 
         />
       </div>
       <div>
@@ -379,7 +430,8 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
       <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
     </div>
   </form>
-);
+  );
+};
 
 const ConfirmModal = ({ show, onClose, onConfirm, title, message }) => {
   if (!show) return null;

@@ -16,7 +16,14 @@ export default function CreateEvent() {
   const [loading, setLoading] = useState(false);
 
   const handleAddSlot = () => {
-    setSlots([...slots, { title: '', description: '', start_time: '', end_time: '', capacity: 5, requirements: '' }]);
+    setSlots([...slots, { 
+      title: '', 
+      description: '', 
+      start_time: formData.start_date || '', 
+      end_time: formData.end_date || '', 
+      capacity: 5, 
+      requirements: '' 
+    }]);
   };
 
   const handleRemoveSlot = (indexToRemove) => {
@@ -26,7 +33,37 @@ export default function CreateEvent() {
   const handleSlotChange = (index, field, value) => {
     const newSlots = [...slots];
     newSlots[index][field] = value;
+    
+    if (field === 'start_time' && value) {
+      const startDateObj = new Date(value);
+      const endDateObj = newSlots[index].end_time ? new Date(newSlots[index].end_time) : null;
+      
+      if (!newSlots[index].end_time || (endDateObj && endDateObj < startDateObj)) {
+        startDateObj.setHours(startDateObj.getHours() + 1);
+        const tzOffset = startDateObj.getTimezoneOffset() * 60000;
+        newSlots[index].end_time = new Date(startDateObj - tzOffset).toISOString().slice(0, 16);
+      }
+    }
+    
     setSlots(newSlots);
+  };
+
+  const handleEventStartDateChange = (e) => {
+    const newStartDate = e.target.value;
+    setFormData(prev => {
+      const newData = { ...prev, start_date: newStartDate };
+      if (newStartDate) {
+        const startDateObj = new Date(newStartDate);
+        const endDateObj = prev.end_date ? new Date(prev.end_date) : null;
+        
+        if (!prev.end_date || (endDateObj && endDateObj < startDateObj)) {
+          startDateObj.setHours(startDateObj.getHours() + 1);
+          const tzOffset = startDateObj.getTimezoneOffset() * 60000;
+          newData.end_date = new Date(startDateObj - tzOffset).toISOString().slice(0, 16);
+        }
+      }
+      return newData;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -78,7 +115,7 @@ export default function CreateEvent() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div className="form-group">
             <label className="form-label">Start Date</label>
-            <input type="datetime-local" className="input-field" required value={formData.start_date} onChange={e => setFormData({...formData, start_date: e.target.value})} />
+            <input type="datetime-local" className="input-field" required value={formData.start_date} onChange={handleEventStartDateChange} />
           </div>
           <div className="form-group">
             <label className="form-label">End Date</label>
