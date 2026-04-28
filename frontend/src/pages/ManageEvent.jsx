@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, ArrowLeft, Trash2, Edit2, Plus, X, Save } from 'lucide-react';
+import { Users, ArrowLeft, Trash2, Edit2, Plus, X, Save, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 
 const toLocalDatetimeLocal = (isoString) => {
@@ -52,6 +52,7 @@ export default function ManageEvent() {
         start_date: toLocalDatetimeLocal(res.data.start_date),
         end_date: toLocalDatetimeLocal(res.data.end_date),
         location_name: res.data.location_name || '',
+        show_volunteers: res.data.show_volunteers ?? false,
       });
       
       const token = localStorage.getItem('token');
@@ -234,6 +235,30 @@ export default function ManageEvent() {
             <label className="form-label">Location</label>
             <input type="text" className="input-field" value={editEventData.location_name} onChange={e => setEditEventData({...editEventData, location_name: e.target.value})} />
           </div>
+          <div className="form-group">
+            <label className="form-label" style={{ marginBottom: '0.75rem' }}>Volunteer Visibility</label>
+            <button
+              type="button"
+              onClick={() => setEditEventData({...editEventData, show_volunteers: !editEventData.show_volunteers})}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
+                backgroundColor: editEventData.show_volunteers ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-surface)',
+                border: `1px solid ${editEventData.show_volunteers ? 'var(--success-color, #10b981)' : 'var(--border-color)'}`,
+                borderRadius: 'var(--radius-md)', cursor: 'pointer', width: '100%',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {editEventData.show_volunteers ? <Eye size={20} color="var(--success-color, #10b981)" /> : <EyeOff size={20} color="var(--text-muted)" />}
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: '500', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                  {editEventData.show_volunteers ? 'Volunteers are visible' : 'Volunteers are hidden'}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                  {editEventData.show_volunteers ? 'Anyone can see who signed up for each shift' : 'Only organizers can see the volunteer list'}
+                </div>
+              </div>
+            </button>
+          </div>
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
             <button type="button" onClick={() => setIsEditingEvent(false)} className="btn"><X size={16} /> Cancel</button>
             <button type="submit" className="btn btn-primary"><Save size={16} /> Save Changes</button>
@@ -246,6 +271,9 @@ export default function ManageEvent() {
           <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             {format(new Date(event.start_date), 'MMM d, yyyy HH:mm')} - {format(new Date(event.end_date), 'MMM d, yyyy HH:mm')}
             {event.location_name && ` • ${event.location_name}`}
+          </div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: '500', backgroundColor: event.show_volunteers ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-surface)', color: event.show_volunteers ? 'var(--success-color, #10b981)' : 'var(--text-muted)', border: `1px solid ${event.show_volunteers ? 'var(--success-color, #10b981)' : 'var(--border-color)'}` }}>
+            {event.show_volunteers ? <><Eye size={14} /> Volunteers visible to everyone</> : <><EyeOff size={14} /> Volunteers hidden from users</>}
           </div>
         </div>
       )}

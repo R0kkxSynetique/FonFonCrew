@@ -37,6 +37,7 @@ model Event {
   location_name String?
   location_lat  Float?
   location_lng  Float?
+  show_volunteers Boolean        @default(false)
   organizer_id  Int
   organizer     User           @relation("OrganizerEvents", fields: [organizer_id], references: [id])
   schedules     ScheduleSlot[]

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { CalendarDays, MapPin, AlignLeft } from 'lucide-react';
+import { CalendarDays, MapPin, AlignLeft, Eye, EyeOff } from 'lucide-react';
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -10,7 +10,8 @@ export default function CreateEvent() {
     description: '',
     start_date: '',
     end_date: '',
-    location_name: ''
+    location_name: '',
+    show_volunteers: false
   });
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -127,6 +128,31 @@ export default function CreateEvent() {
         <div className="form-group">
           <label className="form-label">Location</label>
           <input type="text" className="input-field" value={formData.location_name} onChange={e => setFormData({...formData, location_name: e.target.value})} placeholder="E.g., Flying Field A" />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label" style={{ marginBottom: '0.75rem' }}>Volunteer Visibility</label>
+          <button
+            type="button"
+            onClick={() => setFormData({...formData, show_volunteers: !formData.show_volunteers})}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
+              backgroundColor: formData.show_volunteers ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-surface)',
+              border: `1px solid ${formData.show_volunteers ? 'var(--success-color, #10b981)' : 'var(--border-color)'}`,
+              borderRadius: 'var(--radius-md)', cursor: 'pointer', width: '100%',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {formData.show_volunteers ? <Eye size={20} color="var(--success-color, #10b981)" /> : <EyeOff size={20} color="var(--text-muted)" />}
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontWeight: '500', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                {formData.show_volunteers ? 'Volunteers are visible' : 'Volunteers are hidden'}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                {formData.show_volunteers ? 'Anyone can see who signed up for each shift' : 'Only organizers can see the volunteer list'}
+              </div>
+            </div>
+          </button>
         </div>
 
         <h3 style={{ fontSize: '1.25rem', marginTop: '2rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>

@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export const createEvent = async (req, res) => {
   try {
-    const { name, description, start_date, end_date, location_name, location_lat, location_lng } = req.body;
+    const { name, description, start_date, end_date, location_name, location_lat, location_lng, show_volunteers } = req.body;
     const event = await prisma.event.create({
       data: {
         name,
@@ -14,6 +14,7 @@ export const createEvent = async (req, res) => {
         location_name,
         location_lat,
         location_lng,
+        show_volunteers: show_volunteers ?? false,
         organizer_id: req.user.userId
       }
     });
@@ -50,7 +51,11 @@ export const getEventById = async (req, res) => {
         schedules: { 
           orderBy: { start_time: 'asc' },
           include: {
-            subscriptions: { select: { user_id: true } }
+            subscriptions: { 
+              include: {
+                user: { select: { id: true, firstname: true, lastname: true, email: true } }
+              }
+            }
           }
         }
       }
@@ -66,7 +71,7 @@ export const getEventById = async (req, res) => {
 export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, start_date, end_date, location_name, location_lat, location_lng } = req.body;
+    const { name, description, start_date, end_date, location_name, location_lat, location_lng, show_volunteers } = req.body;
     
     // Check if user is organizer or admin
     const event = await prisma.event.findUnique({ where: { id: parseInt(id) } });
@@ -84,7 +89,8 @@ export const updateEvent = async (req, res) => {
         end_date: end_date ? new Date(end_date) : undefined,
         location_name,
         location_lat,
-        location_lng
+        location_lng,
+        show_volunteers: show_volunteers !== undefined ? show_volunteers : undefined
       }
     });
     res.json(updatedEvent);

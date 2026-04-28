@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Users, ArrowLeft, Calendar, MapPin, Clock } from 'lucide-react';
+import { Users, ArrowLeft, Calendar, MapPin, Clock, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function EventDetails() {
@@ -15,6 +15,7 @@ export default function EventDetails() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [slotToUnsubscribe, setSlotToUnsubscribe] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [showVolunteers, setShowVolunteers] = useState(false);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
@@ -30,7 +31,7 @@ export default function EventDetails() {
       const attendeesData = {};
       if (res.data.schedules) {
         for (const slot of res.data.schedules) {
-          attendeesData[slot.id] = slot.subscriptions.map(sub => ({ id: sub.user_id }));
+          attendeesData[slot.id] = slot.subscriptions.map(sub => ({ id: sub.user_id, ...sub.user }));
         }
       }
       setAttendees(attendeesData);
@@ -139,9 +140,20 @@ export default function EventDetails() {
         </div>
       </div>
 
-      <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <Clock size={24} color="var(--accent-color)" /> Available Volunteer Shifts
-      </h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+          <Clock size={24} color="var(--accent-color)" /> Available Volunteer Shifts
+        </h2>
+        {(event.show_volunteers || canManage) && (
+          <button 
+            onClick={() => setShowVolunteers(!showVolunteers)}
+            className="btn"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+          >
+            {showVolunteers ? <><EyeOff size={18} /> Hide Volunteers</> : <><Eye size={18} /> Show Volunteers</>}
+          </button>
+        )}
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {event.schedules.length === 0 ? (
@@ -172,6 +184,21 @@ export default function EventDetails() {
                     {slot.requirements && (
                       <div style={{ fontSize: '0.9rem', backgroundColor: 'var(--bg-surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'inline-block', marginTop: '0.5rem' }}>
                         <span style={{ fontWeight: 'bold', color: 'var(--text-muted)' }}>Requirements:</span> {slot.requirements}
+                      </div>
+                    )}
+                    {showVolunteers && (event.show_volunteers || canManage) && attendees[slot.id]?.length > 0 && (
+                      <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Volunteers ({attendees[slot.id].length}):</h4>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {attendees[slot.id].map(att => (
+                            <li key={att.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                              <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--accent-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                {(att.firstname?.[0] || '').toUpperCase()}{(att.lastname?.[0] || '').toUpperCase()}
+                              </div>
+                              {att.firstname} {att.lastname}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
                   </div>
