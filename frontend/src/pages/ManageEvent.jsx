@@ -299,7 +299,7 @@ export default function ManageEvent() {
                 </div>
               </div>
               
-              {slot.description && <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>{slot.description}</p>}
+              {slot.description && <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
               {slot.requirements && <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Requirements: {slot.requirements}</p>}
 
               <div style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
@@ -372,13 +372,13 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
       </div>
       <div>
         <label className="form-label">Description (Optional)</label>
-        <input 
-          type="text" 
+        <textarea 
           className="input-field" 
+          rows="2" 
           value={formData.description} 
           onChange={e => setFormData({...formData, description: e.target.value})} 
           placeholder="Duties" 
-        />
+        ></textarea>
       </div>
     </div>
     

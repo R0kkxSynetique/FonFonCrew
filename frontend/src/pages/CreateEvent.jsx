@@ -143,7 +143,7 @@ export default function CreateEvent() {
               </div>
               <div>
                 <label className="form-label">Slot Description (Optional)</label>
-                <input type="text" className="input-field" value={slot.description} onChange={e => handleSlotChange(index, 'description', e.target.value)} placeholder="Brief explanation of duties" />
+                <textarea className="input-field" rows="2" value={slot.description} onChange={e => handleSlotChange(index, 'description', e.target.value)} placeholder="Brief explanation of duties"></textarea>
               </div>
             </div>
             
