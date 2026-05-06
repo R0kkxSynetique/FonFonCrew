@@ -2,7 +2,17 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, ArrowLeft, Trash2, Edit2, Plus, X, Save, Eye, EyeOff } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, differenceInMinutes } from 'date-fns';
+
+const formatDuration = (start, end) => {
+  const mins = differenceInMinutes(new Date(end), new Date(start));
+  if (mins <= 0) return '';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h > 0 && m > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'} ${m} minutes)`;
+  if (h > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'})`;
+  return `(${m} minutes)`;
+};
 
 const toLocalDatetimeLocal = (isoString) => {
   if (!isoString) return '';
@@ -313,7 +323,7 @@ export default function ManageEvent() {
                 <div>
                   <h3 className="text-xl font-bold">{slot.title}</h3>
                   <div className="text-sm text-secondary mt-xs">
-                    {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
+                    {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time)}
                   </div>
                 </div>
                 <div className="flex items-center gap-md">

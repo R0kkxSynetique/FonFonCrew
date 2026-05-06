@@ -2,7 +2,17 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Calendar, Plus, Users, ShieldAlert } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, differenceInMinutes } from 'date-fns';
+
+const formatDuration = (start, end) => {
+  const mins = differenceInMinutes(new Date(end), new Date(start));
+  if (mins <= 0) return '';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h > 0 && m > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'} ${m} minutes)`;
+  if (h > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'})`;
+  return `(${m} minutes)`;
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -71,7 +81,7 @@ export default function Dashboard() {
                         <div>
                           <div className="font-bold text-sm">{slot.title}</div>
                           <div className="text-xs font-medium text-secondary">
-                            {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
+                            {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time)}
                           </div>
                         </div>
                       </div>

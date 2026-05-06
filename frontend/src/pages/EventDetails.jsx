@@ -2,7 +2,17 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, ArrowLeft, Calendar, MapPin, Clock, Eye, EyeOff } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, differenceInMinutes } from 'date-fns';
+
+const formatDuration = (start, end) => {
+  const mins = differenceInMinutes(new Date(end), new Date(start));
+  if (mins <= 0) return '';
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h > 0 && m > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'} ${m} minutes)`;
+  if (h > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'})`;
+  return `(${m} minutes)`;
+};
 
 export default function EventDetails() {
   const { eventId } = useParams();
@@ -166,7 +176,7 @@ export default function EventDetails() {
                     <h3 className="text-2xl font-bold mb-sm">{slot.title}</h3>
                     <div className="text-md text-secondary mb-md flex items-center gap-sm">
                       <Clock size={16} /> 
-                      {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
+                      {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time)}
                     </div>
                     {slot.location && (
                       <div className="text-sm text-secondary mb-sm flex items-center gap-sm">
