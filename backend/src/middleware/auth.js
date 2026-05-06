@@ -17,6 +17,24 @@ export const verifyToken = (req, res, next) => {
   return next();
 };
 
+export const softVerifyToken = (req, res, next) => {
+  const token = req.cookies?.token || req.headers.authorization?.split(' ')[1] || req.query.token;
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+  } catch (err) {
+    req.user = null;
+  }
+
+  return next();
+};
+
 export const requireRole = (roles) => {
   return (req, res, next) => {
     if (!req.user || (!roles.includes(req.user.role) && req.user.role !== 'SUPERADMIN')) {

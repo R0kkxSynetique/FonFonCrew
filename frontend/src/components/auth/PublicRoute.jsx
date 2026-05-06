@@ -8,8 +8,13 @@ const PublicRoute = () => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        await axios.get('/auth/me');
-        setAuthStatus('authenticated');
+        const res = await axios.get('/auth/me');
+        if (res.data) {
+          setAuthStatus('authenticated');
+        } else {
+          localStorage.removeItem('user');
+          setAuthStatus('unauthenticated');
+        }
       } catch (err) {
         localStorage.removeItem('user');
         setAuthStatus('unauthenticated');

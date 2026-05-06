@@ -25,7 +25,7 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     try {
       const res = await axios.get('/users');
-      setUsers(res.data);
+      setUsers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       if (err.response?.status === 403 || err.response?.status === 401) {
         navigate('/dashboard'); // unauthorized
@@ -150,7 +150,7 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody>
-              {users.map(u => (
+              {users?.map(u => (
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem', color: 'var(--text-primary)' }}>{u.firstname} {u.lastname}</td>
                   <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{u.email}</td>
@@ -193,7 +193,7 @@ export default function UserManagement() {
               ))}
             </tbody>
           </table>
-          {users.length === 0 && <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found.</p>}
+          {users?.length === 0 && <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found.</p>}
         </div>
       )}
 

@@ -19,7 +19,7 @@ export default function Dashboard() {
   const fetchEvents = async () => {
     try {
       const res = await axios.get('/events');
-      setEvents(res.data);
+      setEvents(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Failed to fetch events', err);
     } finally {
@@ -41,7 +41,7 @@ export default function Dashboard() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem' }}>
-        {events.map(event => {
+        {events?.map(event => {
           return (
             <div 
               key={event.id} 
@@ -75,7 +75,7 @@ export default function Dashboard() {
                   {event.schedules.length === 0 ? (
                     <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No shifts available yet.</span>
                   ) : (
-                    event.schedules.map(slot => (
+                    event.schedules?.map(slot => (
                       <div key={slot.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-color)', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                         <div>
                           <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{slot.title}</div>
@@ -91,7 +91,7 @@ export default function Dashboard() {
             </div>
           );
         })}
-        {events.length === 0 && (
+        {events?.length === 0 && (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: 'var(--text-secondary)', padding: '3rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
             <Calendar size={48} style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
             <p>No upcoming events found.</p>

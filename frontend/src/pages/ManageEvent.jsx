@@ -56,9 +56,16 @@ export default function ManageEvent() {
       });
       
       const attendeesData = {};
-      for (const slot of res.data.schedules) {
-        const attRes = await axios.get(`/schedules/${slot.id}/attendees`);
-        attendeesData[slot.id] = attRes.data;
+      if (Array.isArray(res.data.schedules)) {
+        for (const slot of res.data.schedules) {
+          try {
+            const attRes = await axios.get(`/schedules/${slot.id}/attendees`);
+            attendeesData[slot.id] = Array.isArray(attRes.data) ? attRes.data : [];
+          } catch (err) {
+            console.error(`Failed to fetch attendees for slot ${slot.id}`, err);
+            attendeesData[slot.id] = [];
+          }
+        }
       }
       setAttendees(attendeesData);
     } catch (err) {
@@ -296,7 +303,7 @@ export default function ManageEvent() {
         />
       )}
 
-      {event.schedules.map(slot => (
+      {event.schedules?.map(slot => (
         <div key={slot.id}>
           {editingSlotId === slot.id ? (
             <SlotForm 
@@ -338,7 +345,7 @@ export default function ManageEvent() {
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>No volunteers subscribed yet.</p>
                 ) : (
                   <div style={{ display: 'grid', gap: '0.75rem' }}>
-                    {attendees[slot.id].map(user => (
+                    {attendees[slot.id]?.map(user => (
                       <div key={user.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
                         <div>
                           <div style={{ fontWeight: '500' }}>{user.firstname} {user.lastname}</div>

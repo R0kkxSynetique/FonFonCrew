@@ -10,14 +10,19 @@ const ProtectedRoute = ({ allowedRoles }) => {
       try {
         const res = await axios.get('/auth/me');
         
-        const user = res.data;
-        // Keep local storage in sync with actual backend truth
-        localStorage.setItem('user', JSON.stringify(user));
+        if (res.data) {
+          const user = res.data;
+          // Keep local storage in sync with actual backend truth
+          localStorage.setItem('user', JSON.stringify(user));
 
-        if (allowedRoles && !allowedRoles.includes(user.role) && user.role !== 'SUPERADMIN') {
-          setAuthStatus('unauthorized');
+          if (allowedRoles && !allowedRoles.includes(user.role) && user.role !== 'SUPERADMIN') {
+            setAuthStatus('unauthorized');
+          } else {
+            setAuthStatus('authorized');
+          }
         } else {
-          setAuthStatus('authorized');
+          localStorage.removeItem('user');
+          setAuthStatus('login');
         }
       } catch (err) {
         // Token is invalid or expired

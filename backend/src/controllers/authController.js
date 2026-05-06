@@ -94,6 +94,10 @@ export const logout = (req, res) => {
 
 export const getMe = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.json(null);
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
       select: {
@@ -109,7 +113,7 @@ export const getMe = async (req, res) => {
     });
     
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.json(null);
     }
     
     res.json(user);
