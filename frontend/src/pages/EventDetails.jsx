@@ -92,67 +92,66 @@ export default function EventDetails() {
     return attendees[slotId].some(att => att.id === user.id);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: '3rem' }}>Loading Event...</div>;
-  if (!event) return <div style={{ textAlign: 'center', marginTop: '3rem' }}>Event not found</div>;
+  if (loading) return <div className="text-center mt-xl">Loading Event...</div>;
+  if (!event) return <div className="text-center mt-xl">Event not found</div>;
 
   const canManage = user && ['ORGANIZER', 'SUPERADMIN'].includes(user?.role) && (user.role === 'SUPERADMIN' || user.id === event.organizer_id);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '3rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <Link to="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', textDecoration: 'none' }}>
+    <div className="page-container-sm" style={{ paddingBottom: '3rem' }}>
+      <div className="mb-xl">
+        <Link to="/dashboard" className="flex items-center gap-sm text-secondary" style={{ textDecoration: 'none', display: 'inline-flex' }}>
           <ArrowLeft size={16} /> Back to Dashboard
         </Link>
       </div>
       
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-           <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>{event.name}</h1>
+      <div className="card mb-xl">
+        <div className="flex justify-between items-start">
+           <h1 className="text-4xl font-bold mb-md">{event.name}</h1>
            {canManage && (
              <Link to={`/events/${event.id}/edit`} className="btn btn-primary">
                Manage Event
              </Link>
            )}
         </div>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '1.1rem', lineHeight: '1.6' }}>
+        <p className="text-secondary mb-lg text-lg" style={{ lineHeight: '1.6' }}>
           {event.description}
         </p>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1.5rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)' }}>
+        <div className="flex flex-col gap-sm p-lg" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <div className="flex items-center gap-sm text-secondary">
             <Calendar size={20} color="var(--accent-color)" />
-            <span style={{ fontWeight: '500' }}>
+            <span className="font-medium">
               {format(new Date(event.start_date), 'MMMM d, yyyy HH:mm')} - {format(new Date(event.end_date), 'MMMM d, yyyy HH:mm')}
             </span>
           </div>
           {event.location_name && (
-             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)' }}>
+             <div className="flex items-center gap-sm text-secondary">
                <MapPin size={20} color="var(--accent-color)" />
-               <span style={{ fontWeight: '500' }}>{event.location_name}</span>
+               <span className="font-medium">{event.location_name}</span>
              </div>
           )}
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+      <div className="flex justify-between items-center mb-lg flex-wrap gap-md">
+        <h2 className="text-2xl font-bold flex items-center gap-sm" style={{ margin: 0 }}>
           <Clock size={24} color="var(--accent-color)" /> Available Volunteer Shifts
         </h2>
         {(event.show_volunteers || canManage) && (
           <button 
             onClick={() => setShowVolunteers(!showVolunteers)}
-            className="btn"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}
+            className="btn flex items-center gap-sm p-sm"
           >
             {showVolunteers ? <><EyeOff size={18} /> Hide Volunteers</> : <><Eye size={18} /> Show Volunteers</>}
           </button>
         )}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div className="flex flex-col gap-lg">
         {event.schedules.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '3rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>No shifts are currently available for this event.</p>
+          <div className="text-center p-xl" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
+            <p className="text-secondary text-lg">No shifts are currently available for this event.</p>
           </div>
         ) : (
           event.schedules.map(slot => {
@@ -161,31 +160,31 @@ export default function EventDetails() {
             const subscribed = isUserSubscribed(slot.id);
 
             return (
-              <div key={slot.id} className="card" style={{ borderLeft: '4px solid var(--accent-color)', padding: '1.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+              <div key={slot.id} className="card p-lg" style={{ borderLeft: '4px solid var(--accent-color)' }}>
+                <div className="flex justify-between items-start flex-wrap gap-md">
                   <div style={{ flex: '1 1 300px' }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{slot.title}</h3>
-                    <div style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <h3 className="text-2xl font-bold mb-sm">{slot.title}</h3>
+                    <div className="text-md text-secondary mb-md flex items-center gap-sm">
                       <Clock size={16} /> 
                       {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
                     </div>
                     {slot.location && (
-                      <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div className="text-sm text-secondary mb-sm flex items-center gap-sm">
                         <MapPin size={16} /> {slot.location}
                       </div>
                     )}
-                    {slot.description && <p style={{ color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
+                    {slot.description && <p className="text-secondary mb-sm" style={{ lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
                     {slot.requirements && (
-                      <div style={{ fontSize: '0.9rem', backgroundColor: 'var(--bg-surface)', padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'inline-block', marginTop: '0.5rem' }}>
-                        <span style={{ fontWeight: 'bold', color: 'var(--text-muted)' }}>Requirements:</span> {slot.requirements}
+                      <div className="text-sm p-sm mt-sm" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'inline-block' }}>
+                        <span className="font-bold text-muted">Requirements:</span> {slot.requirements}
                       </div>
                     )}
                     {showVolunteers && (event.show_volunteers || canManage) && attendees[slot.id]?.length > 0 && (
-                      <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
-                        <h4 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Volunteers ({attendees[slot.id].length}):</h4>
-                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <div className="mt-md pt-md" style={{ borderTop: '1px solid var(--border-color)' }}>
+                        <h4 className="text-md font-bold mb-sm text-primary">Volunteers ({attendees[slot.id].length}):</h4>
+                        <ul className="flex flex-col gap-sm" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                           {attendees[slot.id].map(att => (
-                            <li key={att.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                            <li key={att.id} className="flex items-center gap-sm text-secondary text-sm">
                               <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--accent-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 'bold' }}>
                                 {(att.firstname?.[0] || '').toUpperCase()}{(att.lastname?.[0] || '').toUpperCase()}
                               </div>
@@ -197,13 +196,12 @@ export default function EventDetails() {
                     )}
                   </div>
 
-                  <div style={{ 
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
-                    minWidth: '150px', backgroundColor: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)'
+                  <div className="flex flex-col items-center gap-md p-md" style={{ 
+                    minWidth: '150px', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                    <div className="flex items-center gap-sm text-secondary">
                       <Users size={18} />
-                      <span style={{ fontWeight: '500', fontSize: '1.1rem' }}>{currentAttendeesCount} / {slot.capacity}</span>
+                      <span className="font-medium text-lg">{currentAttendeesCount} / {slot.capacity}</span>
                     </div>
 
                     {!canManage && (
@@ -259,11 +257,11 @@ export default function EventDetails() {
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '400px', maxWidth: '90%', padding: '2rem' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--text-primary)' }}>Confirm Unsubscription</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Are you sure you want to unsubscribe from this shift?</p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+        <div className="modal-overlay">
+          <div className="modal-content modal-content-sm text-center">
+            <h3 className="text-xl font-bold mb-md text-primary">Confirm Unsubscription</h3>
+            <p className="text-secondary mb-lg">Are you sure you want to unsubscribe from this shift?</p>
+            <div className="flex justify-end gap-md">
               <button className="btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
               <button className="btn btn-danger" onClick={confirmUnsubscribe}>Unsubscribe</button>
             </div>

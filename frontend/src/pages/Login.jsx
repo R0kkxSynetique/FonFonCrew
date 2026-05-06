@@ -25,15 +25,15 @@ export default function Login() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '4rem auto 0 auto' }}>
+    <div className="max-w-sm mt-xl">
       <div className="card">
-        <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>Welcome Back</h2>
-        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>
+        <h2 className="text-2xl font-bold mb-sm text-center">Welcome Back</h2>
+        <p className="text-secondary text-center mb-xl">
           Enter your details to access your account.
         </p>
 
         {error && (
-          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger-color)', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
+          <div className="badge-danger p-md mb-lg text-sm w-full">
             {error}
           </div>
         )}
@@ -51,7 +51,7 @@ export default function Login() {
             />
           </div>
           
-          <div className="form-group" style={{ marginBottom: '2rem' }}>
+          <div className="form-group mb-xl">
             <label className="form-label">Password</label>
             <input 
               type="password" 
@@ -63,12 +63,12 @@ export default function Login() {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }} disabled={loading}>
+          <button type="submit" className="btn btn-primary w-full p-md" disabled={loading}>
             {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+        <p className="text-center mt-lg text-secondary text-sm">
           Don't have an account? <Link to="/register">Sign up</Link>
         </p>
       </div>

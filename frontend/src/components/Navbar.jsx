@@ -17,37 +17,30 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
-      padding: '1rem 2rem', 
-      borderBottom: '1px solid var(--border-color)',
-      backgroundColor: 'var(--bg-surface)'
-    }}>
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+    <nav className="flex justify-between items-center p-md flex-responsive" style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface)' }}>
+      <Link to="/" className="flex items-center gap-sm text-xl font-bold text-primary mb-sm">
         <CalendarDays size={28} color="var(--accent-color)" />
         FonFonCrew
       </Link>
-      
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+
+      <div className="flex gap-md items-center nav-menu">
         {user ? (
           <>
-            <span style={{ color: 'var(--text-secondary)' }}>Hello, {user?.firstname}</span>
-            <Link to="/dashboard" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}>Dashboard</Link>
+            <span className="text-secondary hide-on-mobile">{user?.firstname + " " + user?.lastname}</span>
+            <Link to="/dashboard" className="btn btn-primary">Dashboard</Link>
             {user?.role === 'SUPERADMIN' && (
-              <Link to="/users" className="btn" style={{ padding: '0.4rem 0.8rem' }}>Users</Link>
+              <Link to="/users" className="btn">Users</Link>
             )}
-            <button onClick={handleLogout} className="btn" style={{ padding: '0.4rem 0.8rem' }}>
+            <button onClick={handleLogout} className="btn">
               <LogOut size={16} /> Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="btn" style={{ padding: '0.4rem 0.8rem' }}>
+            <Link to="/login" className="btn">
               <LogIn size={16} /> Login
             </Link>
-            <Link to="/register" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}>
+            <Link to="/register" className="btn btn-primary">
               <UserPlus size={16} /> Sign Up
             </Link>
           </>

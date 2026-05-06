@@ -192,17 +192,17 @@ export default function ManageEvent() {
     setEditingSlotId(null);
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: '3rem' }}>Loading Event...</div>;
-  if (!event) return <div style={{ textAlign: 'center', marginTop: '3rem' }}>Event not found</div>;
+  if (loading) return <div className="text-center mt-xl">Loading Event...</div>;
+  if (!event) return <div className="text-center mt-xl">Event not found</div>;
 
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <Link to="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+    <div className="page-container-sm">
+      <div className="flex justify-between items-center mb-xl">
+        <Link to="/dashboard" className="flex items-center gap-sm text-secondary" style={{ textDecoration: 'none' }}>
           <ArrowLeft size={16} /> Back to Dashboard
         </Link>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="flex gap-sm">
           {!isEditingEvent && (
             <button onClick={() => setIsEditingEvent(true)} className="btn">
               <Edit2 size={16} /> Edit Event
@@ -215,8 +215,8 @@ export default function ManageEvent() {
       </div>
       
       {isEditingEvent ? (
-        <form onSubmit={handleUpdateEvent} className="card" style={{ marginBottom: '2rem' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Edit Event Details</h2>
+        <form onSubmit={handleUpdateEvent} className="card mb-xl">
+          <h2 className="text-2xl font-bold mb-md">Edit Event Details</h2>
           <div className="form-group">
             <label className="form-label">Event Name</label>
             <input type="text" className="input-field" required value={editEventData.name} onChange={e => setEditEventData({...editEventData, name: e.target.value})} />
@@ -225,7 +225,7 @@ export default function ManageEvent() {
             <label className="form-label">Description</label>
             <textarea className="input-field" rows="3" value={editEventData.description} onChange={e => setEditEventData({...editEventData, description: e.target.value})}></textarea>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="grid grid-cols-2 gap-md flex-responsive">
             <div className="form-group">
               <label className="form-label">Start Date</label>
               <input type="datetime-local" className="input-field" required value={editEventData.start_date} onChange={handleEventStartDateChange} />
@@ -240,54 +240,48 @@ export default function ManageEvent() {
             <input type="text" className="input-field" value={editEventData.location_name} onChange={e => setEditEventData({...editEventData, location_name: e.target.value})} />
           </div>
           <div className="form-group">
-            <label className="form-label" style={{ marginBottom: '0.75rem' }}>Volunteer Visibility</label>
+            <label className="form-label mb-sm">Volunteer Visibility</label>
             <button
               type="button"
+              className={`visibility-toggle ${editEventData.show_volunteers ? 'active' : ''}`}
               onClick={() => setEditEventData({...editEventData, show_volunteers: !editEventData.show_volunteers})}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem',
-                backgroundColor: editEventData.show_volunteers ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-surface)',
-                border: `1px solid ${editEventData.show_volunteers ? 'var(--success-color, #10b981)' : 'var(--border-color)'}`,
-                borderRadius: 'var(--radius-md)', cursor: 'pointer', width: '100%',
-                transition: 'all 0.2s ease'
-              }}
             >
-              {editEventData.show_volunteers ? <Eye size={20} color="var(--success-color, #10b981)" /> : <EyeOff size={20} color="var(--text-muted)" />}
-              <div style={{ textAlign: 'left' }}>
-                <div style={{ fontWeight: '500', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+              {editEventData.show_volunteers ? <Eye size={20} color="var(--success-color)" /> : <EyeOff size={20} color="var(--text-muted)" />}
+              <div className="text-left">
+                <div className="visibility-toggle-title">
                   {editEventData.show_volunteers ? 'Volunteers are visible' : 'Volunteers are hidden'}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                <div className="visibility-toggle-desc">
                   {editEventData.show_volunteers ? 'Anyone can see who signed up for each shift' : 'Only organizers can see the volunteer list'}
                 </div>
               </div>
             </button>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+          <div className="flex gap-sm justify-end mt-md">
             <button type="button" onClick={() => setIsEditingEvent(false)} className="btn"><X size={16} /> Cancel</button>
             <button type="submit" className="btn btn-primary"><Save size={16} /> Save Changes</button>
           </div>
         </form>
       ) : (
-        <div className="card" style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{event.name}</h1>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>{event.description}</p>
-          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <div className="card mb-xl">
+          <h1 className="text-4xl font-bold mb-sm">{event.name}</h1>
+          <p className="text-secondary mb-md">{event.description}</p>
+          <div className="text-sm text-muted">
             {format(new Date(event.start_date), 'MMM d, yyyy HH:mm')} - {format(new Date(event.end_date), 'MMM d, yyyy HH:mm')}
             {event.location_name && ` • ${event.location_name}`}
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: '500', backgroundColor: event.show_volunteers ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-surface)', color: event.show_volunteers ? 'var(--success-color, #10b981)' : 'var(--text-muted)', border: `1px solid ${event.show_volunteers ? 'var(--success-color, #10b981)' : 'var(--border-color)'}` }}>
-            {event.show_volunteers ? <><Eye size={14} /> Volunteers visible to everyone</> : <><EyeOff size={14} /> Volunteers hidden from users</>}
+          <div className={`mt-sm p-xs badge ${event.show_volunteers ? 'badge-success' : ''}`}>
+            {event.show_volunteers ? <><Eye size={14} className="mr-sm" /> Volunteers visible to everyone</> : <><EyeOff size={14} className="mr-sm" /> Volunteers hidden from users</>}
           </div>
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="flex justify-between items-center mb-lg">
+        <h2 className="text-2xl font-bold flex items-center gap-sm">
           <Users size={24} color="var(--accent-color)" /> Schedule Slots & Volunteers
         </h2>
         {!isAddingSlot && (
-          <button onClick={openAddSlot} className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}>
+          <button onClick={openAddSlot} className="btn btn-primary p-sm">
             <Plus size={16} /> Add Slot
           </button>
         )}
@@ -314,42 +308,42 @@ export default function ManageEvent() {
               setFormData={setSlotFormData}
             />
           ) : (
-            <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-color)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+            <div className="card mb-lg" style={{ borderLeft: '4px solid var(--accent-color)' }}>
+              <div className="flex justify-between items-start mb-md">
                 <div>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{slot.title}</h3>
-                  <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                  <h3 className="text-xl font-bold">{slot.title}</h3>
+                  <div className="text-sm text-secondary mt-xs">
                     {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-color)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                <div className="flex items-center gap-md">
+                  <span className="badge">
                     Capacity: {attendees[slot.id]?.length || 0} / {slot.capacity}
                   </span>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => openEditSlot(slot)} className="btn" style={{ padding: '0.3rem', border: 'none' }} title="Edit Slot"><Edit2 size={16} /></button>
-                    <button onClick={() => triggerDeleteConfirm('slot', slot.id, slot.title)} className="btn btn-danger" style={{ padding: '0.3rem', border: 'none' }} title="Delete Slot"><Trash2 size={16} /></button>
+                  <div className="flex gap-sm">
+                    <button onClick={() => openEditSlot(slot)} className="btn p-sm" style={{ border: 'none' }} title="Edit Slot"><Edit2 size={16} /></button>
+                    <button onClick={() => triggerDeleteConfirm('slot', slot.id, slot.title)} className="btn btn-danger p-sm" style={{ border: 'none' }} title="Delete Slot"><Trash2 size={16} /></button>
                   </div>
                 </div>
               </div>
               
-              {slot.description && <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
-              {slot.requirements && <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Requirements: {slot.requirements}</p>}
+              {slot.description && <p className="text-sm text-secondary mb-sm" style={{ whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
+              {slot.requirements && <p className="text-sm text-muted mb-md">Requirements: {slot.requirements}</p>}
 
-              <div style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', padding: '1rem' }}>
-                <h4 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div className="p-md" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)' }}>
+                <h4 className="text-sm font-bold text-secondary mb-sm uppercase" style={{ letterSpacing: '0.05em' }}>
                   Subscribed Volunteers
                 </h4>
                 
                 {!attendees[slot.id] || attendees[slot.id].length === 0 ? (
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>No volunteers subscribed yet.</p>
+                  <p className="text-sm text-muted italic">No volunteers subscribed yet.</p>
                 ) : (
-                  <div style={{ display: 'grid', gap: '0.75rem' }}>
+                  <div className="grid gap-sm">
                     {attendees[slot.id]?.map(user => (
-                      <div key={user.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+                      <div key={user.id} className="flex justify-between items-center p-sm" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
                         <div>
-                          <div style={{ fontWeight: '500' }}>{user.firstname} {user.lastname}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{user.email} {user.phone ? `• ${user.phone}` : ''}</div>
+                          <div className="font-medium">{user.firstname} {user.lastname}</div>
+                          <div className="text-xs text-muted">{user.email} {user.phone ? `• ${user.phone}` : ''}</div>
                         </div>
                       </div>
                     ))}
@@ -391,8 +385,8 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
   };
 
   return (
-    <form onSubmit={onSubmit} style={{ backgroundColor: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1.5rem' }}>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+    <form onSubmit={onSubmit} className="p-md mb-lg" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+    <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
       <div>
         <label className="form-label">Slot Title</label>
         <input 
@@ -416,7 +410,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
       </div>
     </div>
 
-    <div style={{ marginBottom: '1rem' }}>
+    <div className="mb-md">
       <label className="form-label">On-site Location (Optional)</label>
       <input 
         type="text" 
@@ -427,7 +421,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
       />
     </div>
     
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 100px', gap: '1rem', marginBottom: '0.5rem' }}>
+    <div className="grid gap-md mb-sm flex-responsive" style={{ gridTemplateColumns: '1fr 1fr 100px' }}>
       <div>
         <label className="form-label">Start Time</label>
         <input 
@@ -460,7 +454,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
         />
       </div>
     </div>
-    <div style={{ marginBottom: '1rem' }}>
+    <div className="mb-md">
       <label className="form-label">Requirements (Optional)</label>
       <input 
         type="text" 
@@ -470,7 +464,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
         placeholder="Skills needed" 
       />
     </div>
-    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+    <div className="flex gap-sm justify-end">
       <button type="button" onClick={onCancel} className="btn"><X size={16} /> Cancel</button>
       <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
     </div>
@@ -482,37 +476,21 @@ const ConfirmModal = ({ show, onClose, onConfirm, title, message }) => {
   if (!show) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      backdropFilter: 'blur(4px)'
-    }}>
-      <div className="card" style={{ maxWidth: '400px', width: '90%', padding: '2rem', textAlign: 'center' }}>
-        <div style={{ 
+    <div className="modal-overlay">
+      <div className="modal-content modal-content-sm text-center">
+        <div className="mx-auto mb-lg flex justify-center items-center" style={{ 
           width: '64px', 
           height: '64px', 
           backgroundColor: 'rgba(239, 68, 68, 0.1)', 
-          borderRadius: '50%', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          margin: '0 auto 1.5rem' 
+          borderRadius: '50%'
         }}>
           <Trash2 size={32} color="var(--danger-color)" />
         </div>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{title}</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>{message}</p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <button onClick={onClose} className="btn" style={{ flex: 1 }}>Cancel</button>
-          <button onClick={onConfirm} className="btn btn-danger" style={{ flex: 1 }}>Delete</button>
+        <h2 className="text-2xl font-bold mb-md">{title}</h2>
+        <p className="text-secondary mb-xl">{message}</p>
+        <div className="flex gap-md justify-center">
+          <button onClick={onClose} className="btn w-full">Cancel</button>
+          <button onClick={onConfirm} className="btn btn-danger w-full">Delete</button>
         </div>
       </div>
     </div>

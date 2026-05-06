@@ -122,68 +122,60 @@ export default function UserManagement() {
     }
   };
 
-  if (loading) return <div className="page-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>Loading...</div>;
+  if (loading) return <div className="page-container flex justify-center items-center">Loading...</div>;
 
   return (
-    <div className="page-container" style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>User Management</h1>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+    <div className="page-container p-xl">
+      <div className="flex justify-between items-center mb-xl">
+        <h1 className="page-title text-primary" style={{ marginBottom: 0 }}>User Management</h1>
+        <div className="flex gap-md">
           <button onClick={openCreateModal} className="btn btn-primary">Add User</button>
           <button onClick={() => navigate('/dashboard')} className="btn">Back to Dashboard</button>
         </div>
       </div>
 
       {error ? (
-        <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', padding: '1rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 'var(--radius-md)' }}>
+        <div className="badge-danger p-md mb-md w-full">
           {error}
         </div>
       ) : (
-        <div style={{ overflowX: 'auto', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', padding: '1rem', border: '1px solid var(--border-color)' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div className="table-container">
+          <table className="data-table">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Name</th>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Email</th>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Role</th>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)', fontWeight: '600', width: '150px' }}>Actions</th>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th style={{ width: '150px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users?.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem', color: 'var(--text-primary)' }}>{u.firstname} {u.lastname}</td>
-                  <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{u.email}</td>
-                  <td style={{ padding: '1rem' }}>
+                <tr key={u.id}>
+                  <td>{u.firstname} {u.lastname}</td>
+                  <td className="text-secondary">{u.email}</td>
+                  <td>
                     <select 
                       value={u.role}
                       onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      style={{ 
-                        padding: '0.5rem', 
-                        borderRadius: 'var(--radius-md)', 
-                        border: '1px solid var(--border-color)', 
-                        backgroundColor: 'var(--bg-primary)', 
-                        color: 'var(--text-primary)' 
-                      }}
+                      className="input-field p-sm"
                     >
                       <option value="VOLUNTEER">VOLUNTEER</option>
                       <option value="ORGANIZER">ORGANIZER</option>
                       <option value="SUPERADMIN">SUPERADMIN</option>
                     </select>
                   </td>
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <td>
+                    <div className="flex gap-sm">
                       <button 
                         onClick={() => openEditModal(u)}
-                        className="btn"
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                        className="btn p-sm text-sm"
                       >
                         Edit
                       </button>
                       <button 
                         onClick={() => initiateDelete(u.id)}
-                        className="btn btn-danger"
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                        className="btn btn-danger p-sm text-sm"
                       >
                         Delete
                       </button>
@@ -193,36 +185,36 @@ export default function UserManagement() {
               ))}
             </tbody>
           </table>
-          {users?.length === 0 && <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No users found.</p>}
+          {users?.length === 0 && <p className="p-xl text-center text-secondary">No users found.</p>}
         </div>
       )}
 
       {/* User Create/Edit Modal */}
       {showUserModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '500px', maxWidth: '90%', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 className="text-xl font-bold mb-lg text-primary">
               {editingUser ? 'Edit User' : 'Create User'}
             </h3>
-            <form onSubmit={handleUserSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>First Name</label>
+            <form onSubmit={handleUserSubmit} className="flex flex-col gap-md">
+              <div className="grid grid-cols-2 gap-md flex-responsive">
+                <div>
+                  <label className="form-label">First Name</label>
                   <input type="text" className="input-field" value={formData.firstname} onChange={e => setFormData({...formData, firstname: e.target.value})} required />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Last Name</label>
+                <div>
+                  <label className="form-label">Last Name</label>
                   <input type="text" className="input-field" value={formData.lastname} onChange={e => setFormData({...formData, lastname: e.target.value})} required />
                 </div>
               </div>
               
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Email</label>
+                <label className="form-label">Email</label>
                 <input type="email" className="input-field" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Role</label>
+                <label className="form-label">Role</label>
                 <select className="input-field" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
                   <option value="VOLUNTEER">VOLUNTEER</option>
                   <option value="ORGANIZER">ORGANIZER</option>
@@ -231,10 +223,10 @@ export default function UserManagement() {
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
+                <label className="form-label">
                   Password {editingUser && '(Leave blank to keep unchanged)'}
                 </label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="flex gap-sm">
                   <input type="text" className="input-field" value={formData.password} onChange={e => {
                     setFormData({...formData, password: e.target.value});
                     setGeneratedPassword('');
@@ -243,18 +235,18 @@ export default function UserManagement() {
                 </div>
               </div>
 
-              <div style={{ padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-color)' }}>
+              <div className="p-md flex justify-between items-center mt-md" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <div>
-                  <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Credentials:</div>
-                  <div style={{ fontWeight: 'bold' }}>{formData.email || 'No email entered'}</div>
+                  <div className="text-sm text-secondary">Credentials:</div>
+                  <div className="font-bold">{formData.email || 'No email entered'}</div>
                   <div style={{ fontFamily: 'monospace' }}>{formData.password || (editingUser ? '(unchanged)' : 'No password entered')}</div>
                 </div>
-                <button type="button" onClick={copyCredentials} className="btn" style={{ fontSize: '0.875rem' }}>
+                <button type="button" onClick={copyCredentials} className="btn text-sm">
                   Copy
                 </button>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+              <div className="flex justify-end gap-md mt-md">
                 <button type="button" className="btn" onClick={() => setShowUserModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary">{editingUser ? 'Save Changes' : 'Create User'}</button>
               </div>
@@ -265,11 +257,11 @@ export default function UserManagement() {
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div className="card" style={{ width: '400px', maxWidth: '90%', padding: '2rem' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', color: 'var(--text-primary)' }}>Confirm User Deletion</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Are you sure you want to permanently delete this user? This action cannot be undone.</p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+        <div className="modal-overlay">
+          <div className="modal-content modal-content-sm text-center">
+            <h3 className="text-xl font-bold mb-md text-primary">Confirm User Deletion</h3>
+            <p className="text-secondary mb-lg">Are you sure you want to permanently delete this user? This action cannot be undone.</p>
+            <div className="flex justify-end gap-md">
               <button className="btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
               <button className="btn btn-danger" onClick={confirmDelete}>Delete User</button>
             </div>

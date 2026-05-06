@@ -32,21 +32,21 @@ export default function Register() {
   };
 
   return (
-    <div style={{ maxWidth: '500px', margin: '2rem auto 2rem auto' }}>
+    <div className="max-w-md mt-xl mb-xl">
       <div className="card">
-        <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem', textAlign: 'center' }}>Create an Account</h2>
-        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem' }}>
+        <h2 className="text-2xl font-bold mb-sm text-center">Create an Account</h2>
+        <p className="text-secondary text-center mb-xl">
           Join the FonFonCrew platform to manage or participate in events.
         </p>
 
         {error && (
-          <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger-color)', padding: '0.75rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
+          <div className="badge-danger p-md mb-lg text-sm w-full">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="grid grid-cols-2 gap-md flex-responsive">
             <div className="form-group">
               <label className="form-label">First Name</label>
               <input type="text" className="input-field" required
@@ -71,25 +71,25 @@ export default function Register() {
               value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            <div className="form-group">
+          <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
+            <div className="form-group mb-sm">
               <label className="form-label">Phone Number (Optional)</label>
               <input type="tel" className="input-field"
                 value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
             </div>
-            <div className="form-group">
+            <div className="form-group mb-sm">
               <label className="form-label">Birthday (Optional)</label>
               <input type="date" className="input-field"
                 value={formData.birthday} onChange={(e) => setFormData({...formData, birthday: e.target.value})} />
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }} disabled={loading}>
+          <button type="submit" className="btn btn-primary w-full p-md" disabled={loading}>
             {loading ? 'Registering...' : 'Sign Up'}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+        <p className="text-center mt-lg text-secondary text-sm">
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>
