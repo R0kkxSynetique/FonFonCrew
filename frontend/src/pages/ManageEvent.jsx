@@ -66,6 +66,11 @@ export default function ManageEvent() {
       setAttendees(attendeesData);
     } catch (err) {
       console.error(err);
+      if (err.response && (err.response.status === 403 || err.response.status === 401)) {
+        alert('You do not have permission to manage this event.');
+        navigate(`/events/${eventId}`);
+        return;
+      }
       alert('Failed to load event details.');
     } finally {
       setLoading(false);
