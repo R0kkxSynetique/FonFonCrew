@@ -8,7 +8,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const res = await axios.get('http://localhost:3001/api/auth/me');
+        const res = await axios.get('/auth/me');
         
         const user = res.data;
         // Keep local storage in sync with actual backend truth

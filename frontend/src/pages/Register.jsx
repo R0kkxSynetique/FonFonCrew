@@ -21,7 +21,7 @@ export default function Register() {
     setError('');
     
     try {
-      await axios.post('http://localhost:3001/api/auth/register', formData);
+      await axios.post('/auth/register', formData);
       // Auto login after register or just redirect to login
       navigate('/login');
     } catch (err) {

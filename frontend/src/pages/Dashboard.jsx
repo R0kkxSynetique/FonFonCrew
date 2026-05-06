@@ -18,7 +18,7 @@ export default function Dashboard() {
 
   const fetchEvents = async () => {
     try {
-      const res = await axios.get('http://localhost:3001/api/events');
+      const res = await axios.get('/events');
       setEvents(res.data);
     } catch (err) {
       console.error('Failed to fetch events', err);

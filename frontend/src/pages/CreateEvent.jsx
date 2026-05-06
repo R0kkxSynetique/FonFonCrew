@@ -74,12 +74,12 @@ export default function CreateEvent() {
 
     try {
       // 1. Create Event
-      const res = await axios.post('http://localhost:3001/api/events', formData);
+      const res = await axios.post('/events', formData);
       const eventId = res.data.id;
 
       // 2. Create Slots
       await Promise.all(slots.map(slot => 
-        axios.post('http://localhost:3001/api/schedules', { ...slot, event_id: eventId })
+        axios.post('/schedules', { ...slot, event_id: eventId })
       ));
 
       alert('Event created successfully!');

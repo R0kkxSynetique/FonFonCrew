@@ -36,7 +36,7 @@ export default function ManageEvent() {
 
   const fetchEventDetails = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/events/${eventId}`);
+      const res = await axios.get(`/events/${eventId}`);
       
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (res.data.organizer_id !== user.id && user.role !== 'SUPERADMIN') {
@@ -57,7 +57,7 @@ export default function ManageEvent() {
       
       const attendeesData = {};
       for (const slot of res.data.schedules) {
-        const attRes = await axios.get(`http://localhost:3001/api/schedules/${slot.id}/attendees`);
+        const attRes = await axios.get(`/schedules/${slot.id}/attendees`);
         attendeesData[slot.id] = attRes.data;
       }
       setAttendees(attendeesData);
@@ -76,7 +76,7 @@ export default function ManageEvent() {
 
   const handleDeleteEvent = async () => {
     try {
-      await axios.delete(`http://localhost:3001/api/events/${eventId}`);
+      await axios.delete(`/events/${eventId}`);
       navigate('/dashboard');
     } catch (err) {
       alert('Failed to delete event');
@@ -104,7 +104,7 @@ export default function ManageEvent() {
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3001/api/events/${eventId}`, editEventData);
+      await axios.put(`/events/${eventId}`, editEventData);
       setIsEditingEvent(false);
       fetchEventDetails();
     } catch (err) {
@@ -115,7 +115,7 @@ export default function ManageEvent() {
   const handleCreateSlot = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/api/schedules', { ...slotFormData, event_id: eventId });
+      await axios.post('/schedules', { ...slotFormData, event_id: eventId });
       setIsAddingSlot(false);
       fetchEventDetails();
     } catch (err) {
@@ -126,7 +126,7 @@ export default function ManageEvent() {
   const handleUpdateSlot = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3001/api/schedules/${editingSlotId}`, slotFormData);
+      await axios.put(`/schedules/${editingSlotId}`, slotFormData);
       setEditingSlotId(null);
       fetchEventDetails();
     } catch (err) {
@@ -136,7 +136,7 @@ export default function ManageEvent() {
 
   const handleDeleteSlot = async (slotId) => {
     try {
-      await axios.delete(`http://localhost:3001/api/schedules/${slotId}`);
+      await axios.delete(`/schedules/${slotId}`);
       fetchEventDetails();
     } catch (err) {
       console.error('Delete failed:', err.response?.data || err.message);

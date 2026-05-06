@@ -24,7 +24,7 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:3001/api/users');
+      const res = await axios.get('/users');
       setUsers(res.data);
     } catch (err) {
       if (err.response?.status === 403 || err.response?.status === 401) {
@@ -65,10 +65,10 @@ export default function UserManagement() {
     e.preventDefault();
     try {
       if (editingUser) {
-        await axios.put(`http://localhost:3001/api/users/${editingUser.id}`, formData);
+        await axios.put(`/users/${editingUser.id}`, formData);
         showNotification('User updated successfully', 'success');
       } else {
-        await axios.post('http://localhost:3001/api/users', formData);
+        await axios.post('/users', formData);
         showNotification('User created successfully', 'success');
       }
       setShowUserModal(false);
@@ -94,7 +94,7 @@ export default function UserManagement() {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      await axios.put(`http://localhost:3001/api/users/${userId}/role`, { role: newRole });
+      await axios.put(`/users/${userId}/role`, { role: newRole });
       showNotification('User role updated successfully', 'success');
       fetchUsers();
     } catch (err) {
@@ -114,7 +114,7 @@ export default function UserManagement() {
     setUserToDelete(null);
 
     try {
-      await axios.delete(`http://localhost:3001/api/users/${userId}`);
+      await axios.delete(`/users/${userId}`);
       showNotification('User deleted successfully', 'success');
       fetchUsers();
     } catch (err) {

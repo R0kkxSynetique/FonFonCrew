@@ -25,7 +25,7 @@ export default function EventDetails() {
 
   const fetchEventDetails = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/events/${eventId}?t=${new Date().getTime()}`);
+      const res = await axios.get(`/events/${eventId}?t=${new Date().getTime()}`);
       setEvent(res.data);
       
       const attendeesData = {};
@@ -49,7 +49,7 @@ export default function EventDetails() {
         navigate('/login');
         return;
       }
-      await axios.post(`http://localhost:3001/api/schedules/${slotId}/subscriptions`, {});
+      await axios.post(`/schedules/${slotId}/subscriptions`, {});
       showNotification('Successfully subscribed!', 'success');
       await fetchEventDetails();
     } catch (err) {
@@ -73,7 +73,7 @@ export default function EventDetails() {
         navigate('/login');
         return;
       }
-      await axios.delete(`http://localhost:3001/api/schedules/${slotId}/subscriptions`);
+      await axios.delete(`/schedules/${slotId}/subscriptions`);
       setHoveredSlot(null);
       await fetchEventDetails();
       showNotification('Successfully unsubscribed!', 'success');
