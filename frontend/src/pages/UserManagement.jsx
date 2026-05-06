@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-hot-toast';
 
 export default function UserManagement() {
   const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [notification, setNotification] = useState(null);
   
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -39,11 +39,6 @@ export default function UserManagement() {
     }
   };
 
-  const showNotification = (msg, type) => {
-    setNotification({ msg, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
   const generatePassword = () => {
     const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
     let pwd = "";
@@ -57,9 +52,9 @@ export default function UserManagement() {
     const text = `Email: ${formData.email}\nPassword: ${pwdToCopy}`;
     try {
       await navigator.clipboard.writeText(text);
-      showNotification(t('user_management.success_copy'), 'success');
+      toast.success(t('user_management.success_copy'));
     } catch (err) {
-      showNotification(t('user_management.error_copy'), 'error');
+      toast.error(t('user_management.error_copy'));
     }
   };
 
@@ -68,15 +63,15 @@ export default function UserManagement() {
     try {
       if (editingUser) {
         await axios.put(`/users/${editingUser.id}`, formData);
-        showNotification(t('user_management.success_update'), 'success');
+        toast.success(t('user_management.success_update'));
       } else {
         await axios.post('/users', formData);
-        showNotification(t('user_management.success_create'), 'success');
+        toast.success(t('user_management.success_create'));
       }
       setShowUserModal(false);
       fetchUsers();
     } catch (err) {
-      showNotification(err.response?.data?.error || t('user_management.error_operation'), 'error');
+      toast.error(err.response?.data?.error || t('user_management.error_operation'));
     }
   };
   
@@ -97,10 +92,10 @@ export default function UserManagement() {
   const handleRoleChange = async (userId, newRole) => {
     try {
       await axios.put(`/users/${userId}/role`, { role: newRole });
-      showNotification(t('user_management.success_role'), 'success');
+      toast.success(t('user_management.success_role'));
       fetchUsers();
     } catch (err) {
-      showNotification(err.response?.data?.error || t('user_management.error_role'), 'error');
+      toast.error(err.response?.data?.error || t('user_management.error_role'));
     }
   };
 
@@ -117,10 +112,10 @@ export default function UserManagement() {
 
     try {
       await axios.delete(`/users/${userId}`);
-      showNotification(t('user_management.success_delete'), 'success');
+      toast.success(t('user_management.success_delete'));
       fetchUsers();
     } catch (err) {
-      showNotification(err.response?.data?.error || t('user_management.error_delete'), 'error');
+      toast.error(err.response?.data?.error || t('user_management.error_delete'));
     }
   };
 
@@ -271,17 +266,6 @@ export default function UserManagement() {
         </div>
       )}
 
-      {/* Notification Toast */}
-      {notification && (
-        <div style={{ 
-          position: 'fixed', bottom: '2rem', right: '2rem', padding: '1rem 1.5rem', 
-          backgroundColor: notification.type === 'success' ? 'var(--success-color)' : 'var(--danger-color)', 
-          color: 'white', borderRadius: 'var(--radius-md)', fontWeight: 'bold', zIndex: 1100, 
-          boxShadow: 'var(--shadow-lg)', animation: 'fadeIn 0.3s ease-out'
-        }}>
-          {notification.msg}
-        </div>
-      )}
     </div>
   );
 }
