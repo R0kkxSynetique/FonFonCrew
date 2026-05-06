@@ -4,20 +4,22 @@ import axios from 'axios';
 import { Users, ArrowLeft, Calendar, MapPin, Clock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format, differenceInMinutes } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
-const formatDuration = (start, end) => {
+const formatDuration = (start, end, t) => {
   const mins = differenceInMinutes(new Date(end), new Date(start));
   if (mins <= 0) return '';
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-  if (h > 0 && m > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'} ${m} minutes)`;
-  if (h > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'})`;
-  return `(${m} minutes)`;
+  if (h > 0 && m > 0) return `(${h} ${h === 1 ? t('time.hour') : t('time.hours')} ${m} ${t('time.minutes')})`;
+  if (h > 0) return `(${h} ${h === 1 ? t('time.hour') : t('time.hours')})`;
+  return `(${m} ${t('time.minutes')})`;
 };
 
 export default function EventDetails() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [event, setEvent] = useState(null);
   const [attendees, setAttendees] = useState({});
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,7 @@ export default function EventDetails() {
       setAttendees(attendeesData);
     } catch (err) {
       console.error(err);
-      toast.error('Failed to load event details.');
+      toast.error(t('event_details.error_load'));
     } finally {
       setLoading(false);
     }
@@ -60,10 +62,10 @@ export default function EventDetails() {
         return;
       }
       await axios.post(`/schedules/${slotId}/subscriptions`, {});
-      toast.success('Successfully subscribed!');
+      toast.success(t('event_details.success_subscribed'));
       await fetchEventDetails();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to subscribe');
+      toast.error(err.response?.data?.error || t('event_details.error_subscribe'));
     }
   };
 
@@ -86,9 +88,9 @@ export default function EventDetails() {
       await axios.delete(`/schedules/${slotId}/subscriptions`);
       setHoveredSlot(null);
       await fetchEventDetails();
-      toast.success('Successfully unsubscribed!');
+      toast.success(t('event_details.success_unsubscribed'));
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to unsubscribe');
+      toast.error(err.response?.data?.error || t('event_details.error_unsubscribe'));
     }
   };
 
@@ -97,8 +99,8 @@ export default function EventDetails() {
     return attendees[slotId].some(att => att.id === user.id);
   };
 
-  if (loading) return <div className="text-center mt-xl">Loading Event...</div>;
-  if (!event) return <div className="text-center mt-xl">Event not found</div>;
+  if (loading) return <div className="text-center mt-xl">{t('event_details.loading')}</div>;
+  if (!event) return <div className="text-center mt-xl">{t('event_details.not_found')}</div>;
 
   const canManage = user && ['ORGANIZER', 'SUPERADMIN'].includes(user?.role) && (user.role === 'SUPERADMIN' || user.id === event.organizer_id);
 
@@ -106,7 +108,7 @@ export default function EventDetails() {
     <div className="page-container-sm" style={{ paddingBottom: '3rem' }}>
       <div className="mb-xl">
         <Link to="/dashboard" className="flex items-center gap-sm text-secondary" style={{ textDecoration: 'none', display: 'inline-flex' }}>
-          <ArrowLeft size={16} /> Back to Dashboard
+          <ArrowLeft size={16} /> {t('event_details.back')}
         </Link>
       </div>
       
@@ -115,7 +117,7 @@ export default function EventDetails() {
            <h1 className="text-4xl font-bold mb-md">{event.name}</h1>
            {canManage && (
              <Link to={`/events/${event.id}/edit`} className="btn btn-primary">
-               Manage Event
+               {t('event_details.manage_event')}
              </Link>
            )}
         </div>
@@ -141,14 +143,14 @@ export default function EventDetails() {
 
       <div className="flex justify-between items-center mb-lg flex-wrap gap-md">
         <h2 className="text-2xl font-bold flex items-center gap-sm" style={{ margin: 0 }}>
-          <Clock size={24} color="var(--accent-color)" /> Available Volunteer Shifts
+          <Clock size={24} color="var(--accent-color)" /> {t('event_details.available_shifts')}
         </h2>
         {(event.show_volunteers || canManage) && (
           <button 
             onClick={() => setShowVolunteers(!showVolunteers)}
             className="btn flex items-center gap-sm p-sm"
           >
-            {showVolunteers ? <><EyeOff size={18} /> Hide Volunteers</> : <><Eye size={18} /> Show Volunteers</>}
+            {showVolunteers ? <><EyeOff size={18} /> {t('event_details.hide_volunteers')}</> : <><Eye size={18} /> {t('event_details.show_volunteers')}</>}
           </button>
         )}
       </div>
@@ -156,7 +158,7 @@ export default function EventDetails() {
       <div className="flex flex-col gap-lg">
         {event.schedules.length === 0 ? (
           <div className="text-center p-xl" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
-            <p className="text-secondary text-lg">No shifts are currently available for this event.</p>
+            <p className="text-secondary text-lg">{t('event_details.no_shifts')}</p>
           </div>
         ) : (
           event.schedules.map(slot => {
@@ -171,15 +173,15 @@ export default function EventDetails() {
                     <h3 className="text-2xl font-bold mb-sm">{slot.title}</h3>
                     <div className="text-md text-secondary mb-md flex items-center gap-sm">
                       <Clock size={16} /> 
-                      {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time)}
+                      {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time, t)}
                     </div>
                     {slot.show_buffer && (slot.buffer_before > 0 || slot.buffer_after > 0) && (
                       <div className="text-sm text-secondary mb-sm flex items-center gap-sm">
                         <Clock size={16} style={{ visibility: 'hidden' }} />
                         <span className="text-muted italic">
-                          Preparation: 
-                          {slot.buffer_before > 0 && ` +${slot.buffer_before}m before`}
-                          {slot.buffer_after > 0 && ` +${slot.buffer_after}m after`}
+                          {t('event_details.preparation')}: 
+                          {slot.buffer_before > 0 && ` +${slot.buffer_before}m ${t('event_details.before')}`}
+                          {slot.buffer_after > 0 && ` +${slot.buffer_after}m ${t('event_details.after')}`}
                         </span>
                       </div>
                     )}
@@ -191,12 +193,12 @@ export default function EventDetails() {
                     {slot.description && <p className="text-secondary mb-sm" style={{ lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
                     {slot.requirements && (
                       <div className="text-sm p-sm mt-sm" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', display: 'inline-block' }}>
-                        <span className="font-bold text-muted">Requirements:</span> {slot.requirements}
+                        <span className="font-bold text-muted">{t('event_details.requirements')}:</span> {slot.requirements}
                       </div>
                     )}
                     {showVolunteers && (event.show_volunteers || canManage) && attendees[slot.id]?.length > 0 && (
                       <div className="mt-md pt-md" style={{ borderTop: '1px solid var(--border-color)' }}>
-                        <h4 className="text-md font-bold mb-sm text-primary">Volunteers ({attendees[slot.id].length}):</h4>
+                        <h4 className="text-md font-bold mb-sm text-primary">{t('event_details.volunteers')} ({attendees[slot.id].length}):</h4>
                         <ul className="flex flex-col gap-sm" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                           {attendees[slot.id].map(att => (
                             <li key={att.id} className="flex items-center gap-sm text-secondary text-sm">
@@ -245,21 +247,21 @@ export default function EventDetails() {
                           onMouseEnter={() => setHoveredSlot(slot.id)}
                           onMouseLeave={() => setHoveredSlot(null)}
                         >
-                          {hoveredSlot === slot.id ? 'Unsubscribe' : '✓ Subscribed'}
+                          {hoveredSlot === slot.id ? t('event_details.unsubscribe') : t('event_details.subscribed')}
                         </button>
                       ) : isFull ? (
                         <div style={{ backgroundColor: 'var(--text-muted)', color: 'white', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 'bold', fontSize: '0.9rem', textAlign: 'center', width: '100%', cursor: 'not-allowed' }}>
-                          Shift Full
+                          {t('event_details.shift_full')}
                         </div>
                       ) : (
                         <button key={`subscribe-${slot.id}`} onClick={() => subscribeToSlot(slot.id)} className="btn btn-primary" style={{ width: '100%', padding: '0.6rem 1rem' }}>
-                          Volunteer
+                          {t('event_details.volunteer_button')}
                         </button>
                       )
                     )}
                     {canManage && (
                       <Link to={`/events/${event.id}/edit`} className="btn" style={{ width: '100%', textAlign: 'center', display: 'block' }}>
-                         Manage Shift
+                         {t('event_details.manage_shift')}
                       </Link>
                     )}
                   </div>
@@ -274,11 +276,11 @@ export default function EventDetails() {
       {showConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-content modal-content-sm text-center">
-            <h3 className="text-xl font-bold mb-md text-primary">Confirm Unsubscription</h3>
-            <p className="text-secondary mb-lg">Are you sure you want to unsubscribe from this shift?</p>
+            <h3 className="text-xl font-bold mb-md text-primary">{t('event_details.confirm_unsub_title')}</h3>
+            <p className="text-secondary mb-lg">{t('event_details.confirm_unsub_desc')}</p>
             <div className="flex justify-end gap-md">
-              <button className="btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
-              <button className="btn btn-danger" onClick={confirmUnsubscribe}>Unsubscribe</button>
+              <button className="btn" onClick={() => setShowConfirmModal(false)}>{t('event_details.cancel')}</button>
+              <button className="btn btn-danger" onClick={confirmUnsubscribe}>{t('event_details.unsubscribe')}</button>
             </div>
           </div>
         </div>

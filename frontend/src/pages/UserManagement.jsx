@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function UserManagement() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -30,7 +32,7 @@ export default function UserManagement() {
       if (err.response?.status === 403 || err.response?.status === 401) {
         navigate('/dashboard'); // unauthorized
       } else {
-        setError(err.response?.data?.error || 'Failed to fetch users');
+        setError(err.response?.data?.error || t('user_management.error_fetch'));
       }
     } finally {
       setLoading(false);
@@ -51,13 +53,13 @@ export default function UserManagement() {
   };
   
   const copyCredentials = async () => {
-    const pwdToCopy = formData.password || (editingUser ? '(unchanged)' : 'No password entered');
+    const pwdToCopy = formData.password || (editingUser ? t('user_management.unchanged') : t('user_management.no_password'));
     const text = `Email: ${formData.email}\nPassword: ${pwdToCopy}`;
     try {
       await navigator.clipboard.writeText(text);
-      showNotification('Credentials copied to clipboard!', 'success');
+      showNotification(t('user_management.success_copy'), 'success');
     } catch (err) {
-      showNotification('Failed to copy', 'error');
+      showNotification(t('user_management.error_copy'), 'error');
     }
   };
 
@@ -66,15 +68,15 @@ export default function UserManagement() {
     try {
       if (editingUser) {
         await axios.put(`/users/${editingUser.id}`, formData);
-        showNotification('User updated successfully', 'success');
+        showNotification(t('user_management.success_update'), 'success');
       } else {
         await axios.post('/users', formData);
-        showNotification('User created successfully', 'success');
+        showNotification(t('user_management.success_create'), 'success');
       }
       setShowUserModal(false);
       fetchUsers();
     } catch (err) {
-      showNotification(err.response?.data?.error || 'Operation failed', 'error');
+      showNotification(err.response?.data?.error || t('user_management.error_operation'), 'error');
     }
   };
   
@@ -95,10 +97,10 @@ export default function UserManagement() {
   const handleRoleChange = async (userId, newRole) => {
     try {
       await axios.put(`/users/${userId}/role`, { role: newRole });
-      showNotification('User role updated successfully', 'success');
+      showNotification(t('user_management.success_role'), 'success');
       fetchUsers();
     } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to update role', 'error');
+      showNotification(err.response?.data?.error || t('user_management.error_role'), 'error');
     }
   };
 
@@ -115,22 +117,22 @@ export default function UserManagement() {
 
     try {
       await axios.delete(`/users/${userId}`);
-      showNotification('User deleted successfully', 'success');
+      showNotification(t('user_management.success_delete'), 'success');
       fetchUsers();
     } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to delete user', 'error');
+      showNotification(err.response?.data?.error || t('user_management.error_delete'), 'error');
     }
   };
 
-  if (loading) return <div className="page-container flex justify-center items-center">Loading...</div>;
+  if (loading) return <div className="page-container flex justify-center items-center">{t('user_management.loading')}</div>;
 
   return (
     <div className="page-container p-xl">
       <div className="flex justify-between items-center mb-xl">
-        <h1 className="page-title text-primary" style={{ marginBottom: 0 }}>User Management</h1>
+        <h1 className="page-title text-primary" style={{ marginBottom: 0 }}>{t('user_management.title')}</h1>
         <div className="flex gap-md">
-          <button onClick={openCreateModal} className="btn btn-primary">Add User</button>
-          <button onClick={() => navigate('/dashboard')} className="btn">Back to Dashboard</button>
+          <button onClick={openCreateModal} className="btn btn-primary">{t('user_management.add_user')}</button>
+          <button onClick={() => navigate('/dashboard')} className="btn">{t('user_management.back')}</button>
         </div>
       </div>
 
@@ -143,10 +145,10 @@ export default function UserManagement() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th style={{ width: '150px' }}>Actions</th>
+                <th>{t('user_management.name')}</th>
+                <th>{t('user_management.email')}</th>
+                <th>{t('user_management.role')}</th>
+                <th style={{ width: '150px' }}>{t('user_management.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -171,13 +173,13 @@ export default function UserManagement() {
                         onClick={() => openEditModal(u)}
                         className="btn p-sm text-sm"
                       >
-                        Edit
+                        {t('user_management.edit')}
                       </button>
                       <button 
                         onClick={() => initiateDelete(u.id)}
                         className="btn btn-danger p-sm text-sm"
                       >
-                        Delete
+                        {t('user_management.delete')}
                       </button>
                     </div>
                   </td>
@@ -185,7 +187,7 @@ export default function UserManagement() {
               ))}
             </tbody>
           </table>
-          {users?.length === 0 && <p className="p-xl text-center text-secondary">No users found.</p>}
+          {users?.length === 0 && <p className="p-xl text-center text-secondary">{t('user_management.no_users')}</p>}
         </div>
       )}
 
@@ -194,27 +196,27 @@ export default function UserManagement() {
         <div className="modal-overlay">
           <div className="modal-content">
             <h3 className="text-xl font-bold mb-lg text-primary">
-              {editingUser ? 'Edit User' : 'Create User'}
+              {editingUser ? t('user_management.edit_user') : t('user_management.create_user')}
             </h3>
             <form onSubmit={handleUserSubmit} className="flex flex-col gap-md">
               <div className="grid grid-cols-2 gap-md flex-responsive">
                 <div>
-                  <label className="form-label">First Name</label>
+                  <label className="form-label">{t('user_management.first_name')}</label>
                   <input type="text" className="input-field" value={formData.firstname} onChange={e => setFormData({...formData, firstname: e.target.value})} required />
                 </div>
                 <div>
-                  <label className="form-label">Last Name</label>
+                  <label className="form-label">{t('user_management.last_name')}</label>
                   <input type="text" className="input-field" value={formData.lastname} onChange={e => setFormData({...formData, lastname: e.target.value})} required />
                 </div>
               </div>
               
               <div>
-                <label className="form-label">Email</label>
+                <label className="form-label">{t('user_management.email')}</label>
                 <input type="email" className="input-field" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
               </div>
 
               <div>
-                <label className="form-label">Role</label>
+                <label className="form-label">{t('user_management.role')}</label>
                 <select className="input-field" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
                   <option value="VOLUNTEER">VOLUNTEER</option>
                   <option value="ORGANIZER">ORGANIZER</option>
@@ -224,31 +226,31 @@ export default function UserManagement() {
 
               <div>
                 <label className="form-label">
-                  Password {editingUser && '(Leave blank to keep unchanged)'}
+                  {t('user_management.password')} {editingUser && t('user_management.password_unchanged')}
                 </label>
                 <div className="flex gap-sm">
                   <input type="text" className="input-field" value={formData.password} onChange={e => {
                     setFormData({...formData, password: e.target.value});
                     setGeneratedPassword('');
                   }} required={!editingUser} style={{ flex: 1 }} />
-                  <button type="button" onClick={generatePassword} className="btn" style={{ whiteSpace: 'nowrap' }}>Generate</button>
+                  <button type="button" onClick={generatePassword} className="btn" style={{ whiteSpace: 'nowrap' }}>{t('user_management.generate')}</button>
                 </div>
               </div>
 
               <div className="p-md flex justify-between items-center mt-md" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <div>
-                  <div className="text-sm text-secondary">Credentials:</div>
-                  <div className="font-bold">{formData.email || 'No email entered'}</div>
-                  <div style={{ fontFamily: 'monospace' }}>{formData.password || (editingUser ? '(unchanged)' : 'No password entered')}</div>
+                  <div className="text-sm text-secondary">{t('user_management.credentials')}</div>
+                  <div className="font-bold">{formData.email || t('user_management.no_email')}</div>
+                  <div style={{ fontFamily: 'monospace' }}>{formData.password || (editingUser ? t('user_management.unchanged') : t('user_management.no_password'))}</div>
                 </div>
                 <button type="button" onClick={copyCredentials} className="btn text-sm">
-                  Copy
+                  {t('user_management.copy')}
                 </button>
               </div>
 
               <div className="flex justify-end gap-md mt-md">
-                <button type="button" className="btn" onClick={() => setShowUserModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">{editingUser ? 'Save Changes' : 'Create User'}</button>
+                <button type="button" className="btn" onClick={() => setShowUserModal(false)}>{t('user_management.cancel')}</button>
+                <button type="submit" className="btn btn-primary">{editingUser ? t('user_management.save_changes') : t('user_management.create_user')}</button>
               </div>
             </form>
           </div>
@@ -259,11 +261,11 @@ export default function UserManagement() {
       {showConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-content modal-content-sm text-center">
-            <h3 className="text-xl font-bold mb-md text-primary">Confirm User Deletion</h3>
-            <p className="text-secondary mb-lg">Are you sure you want to permanently delete this user? This action cannot be undone.</p>
+            <h3 className="text-xl font-bold mb-md text-primary">{t('user_management.confirm_delete_title')}</h3>
+            <p className="text-secondary mb-lg">{t('user_management.confirm_delete_desc')}</p>
             <div className="flex justify-end gap-md">
-              <button className="btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
-              <button className="btn btn-danger" onClick={confirmDelete}>Delete User</button>
+              <button className="btn" onClick={() => setShowConfirmModal(false)}>{t('user_management.cancel')}</button>
+              <button className="btn btn-danger" onClick={confirmDelete}>{t('user_management.delete_user')}</button>
             </div>
           </div>
         </div>

@@ -4,15 +4,16 @@ import axios from 'axios';
 import { Users, ArrowLeft, Trash2, Edit2, Plus, X, Save, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { format, differenceInMinutes } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
-const formatDuration = (start, end) => {
+const formatDuration = (start, end, t) => {
   const mins = differenceInMinutes(new Date(end), new Date(start));
   if (mins <= 0) return '';
   const h = Math.floor(mins / 60);
   const m = mins % 60;
-  if (h > 0 && m > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'} ${m} minutes)`;
-  if (h > 0) return `(${h} ${h === 1 ? 'hour' : 'hours'})`;
-  return `(${m} minutes)`;
+  if (h > 0 && m > 0) return `(${h} ${h === 1 ? t('time.hour') : t('time.hours')} ${m} ${t('time.minutes')})`;
+  if (h > 0) return `(${h} ${h === 1 ? t('time.hour') : t('time.hours')})`;
+  return `(${m} ${t('time.minutes')})`;
 };
 
 const toLocalDatetimeLocal = (isoString) => {
@@ -25,6 +26,7 @@ const toLocalDatetimeLocal = (isoString) => {
 export default function ManageEvent() {
   const { eventId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [event, setEvent] = useState(null);
   const [attendees, setAttendees] = useState({});
   const [loading, setLoading] = useState(true);
@@ -51,7 +53,7 @@ export default function ManageEvent() {
       
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (res.data.organizer_id !== user.id && user.role !== 'SUPERADMIN') {
-         toast.error('You do not have permission to manage this event.');
+         toast.error(t('manage_event.error_permission'));
          navigate(`/events/${eventId}`);
          return;
       }
@@ -82,11 +84,11 @@ export default function ManageEvent() {
     } catch (err) {
       console.error(err);
       if (err.response && (err.response.status === 403 || err.response.status === 401)) {
-        toast.error('You do not have permission to manage this event.');
+        toast.error(t('manage_event.error_permission'));
         navigate(`/events/${eventId}`);
         return;
       }
-      toast.error('Failed to load event details.');
+      toast.error(t('manage_event.error_load'));
     } finally {
       setLoading(false);
     }
@@ -95,10 +97,10 @@ export default function ManageEvent() {
   const handleDeleteEvent = async () => {
     try {
       await axios.delete(`/events/${eventId}`);
-      toast.success('Event deleted successfully');
+      toast.success(t('manage_event.success_delete_event'));
       navigate('/dashboard');
     } catch (err) {
-      toast.error('Failed to delete event');
+      toast.error(t('manage_event.error_delete_event'));
     }
   };
 
@@ -125,10 +127,10 @@ export default function ManageEvent() {
     try {
       await axios.put(`/events/${eventId}`, editEventData);
       setIsEditingEvent(false);
-      toast.success('Event updated successfully');
+      toast.success(t('manage_event.success_update_event'));
       fetchEventDetails();
     } catch (err) {
-      toast.error('Failed to update event details');
+      toast.error(t('manage_event.error_update_event'));
     }
   };
 
@@ -137,10 +139,10 @@ export default function ManageEvent() {
     try {
       await axios.post('/schedules', { ...slotFormData, event_id: eventId });
       setIsAddingSlot(false);
-      toast.success('Slot created successfully');
+      toast.success(t('manage_event.success_create_slot'));
       fetchEventDetails();
     } catch (err) {
-      toast.error('Failed to create slot');
+      toast.error(t('manage_event.error_create_slot'));
     }
   };
 
@@ -149,21 +151,21 @@ export default function ManageEvent() {
     try {
       await axios.put(`/schedules/${editingSlotId}`, slotFormData);
       setEditingSlotId(null);
-      toast.success('Slot updated successfully');
+      toast.success(t('manage_event.success_update_slot'));
       fetchEventDetails();
     } catch (err) {
-      toast.error('Failed to update slot');
+      toast.error(t('manage_event.error_update_slot'));
     }
   };
 
   const handleDeleteSlot = async (slotId) => {
     try {
       await axios.delete(`/schedules/${slotId}`);
-      toast.success('Slot deleted successfully');
+      toast.success(t('manage_event.success_delete_slot'));
       fetchEventDetails();
     } catch (err) {
       console.error('Delete failed:', err.response?.data || err.message);
-      toast.error('Failed to delete slot');
+      toast.error(t('manage_event.error_delete_slot'));
     }
   };
 
@@ -214,55 +216,55 @@ export default function ManageEvent() {
     setEditingSlotId(null);
   };
 
-  if (loading) return <div className="text-center mt-xl">Loading Event...</div>;
-  if (!event) return <div className="text-center mt-xl">Event not found</div>;
+  if (loading) return <div className="text-center mt-xl">{t('manage_event.loading')}</div>;
+  if (!event) return <div className="text-center mt-xl">{t('manage_event.not_found')}</div>;
 
 
   return (
     <div className="page-container-sm">
       <div className="flex justify-between items-center mb-xl">
         <Link to="/dashboard" className="flex items-center gap-sm text-secondary" style={{ textDecoration: 'none' }}>
-          <ArrowLeft size={16} /> Back to Dashboard
+          <ArrowLeft size={16} /> {t('manage_event.back')}
         </Link>
         <div className="flex gap-sm">
           {!isEditingEvent && (
             <button onClick={() => setIsEditingEvent(true)} className="btn">
-              <Edit2 size={16} /> Edit Event
+              <Edit2 size={16} /> {t('manage_event.edit_event')}
             </button>
           )}
           <button onClick={() => triggerDeleteConfirm('event', eventId, event.name)} className="btn btn-danger">
-            <Trash2 size={16} /> Delete
+            <Trash2 size={16} /> {t('manage_event.delete')}
           </button>
         </div>
       </div>
       
       {isEditingEvent ? (
         <form onSubmit={handleUpdateEvent} className="card mb-xl">
-          <h2 className="text-2xl font-bold mb-md">Edit Event Details</h2>
+          <h2 className="text-2xl font-bold mb-md">{t('manage_event.edit_details')}</h2>
           <div className="form-group">
-            <label className="form-label">Event Name</label>
+            <label className="form-label">{t('event_form.name_label')}</label>
             <input type="text" className="input-field" required value={editEventData.name} onChange={e => setEditEventData({...editEventData, name: e.target.value})} />
           </div>
           <div className="form-group">
-            <label className="form-label">Description</label>
+            <label className="form-label">{t('event_form.desc_label')}</label>
             <textarea className="input-field" rows="3" value={editEventData.description} onChange={e => setEditEventData({...editEventData, description: e.target.value})}></textarea>
           </div>
           <div className="grid grid-cols-2 gap-md flex-responsive">
             <div className="form-group">
-              <label className="form-label">Start Date</label>
+              <label className="form-label">{t('event_form.start_date')}</label>
               <input type="datetime-local" className="input-field" required value={editEventData.start_date} onChange={handleEventStartDateChange} />
             </div>
             <div className="form-group">
-              <label className="form-label">End Date</label>
+              <label className="form-label">{t('event_form.end_date')}</label>
               <input type="datetime-local" className="input-field" required value={editEventData.end_date} onChange={e => setEditEventData({...editEventData, end_date: e.target.value})} />
             </div>
           </div>
           <div className="form-group mb-4">
-            <label className="form-label">Location</label>
+            <label className="form-label">{t('event_form.location')}</label>
             <input type="text" className="input-field" value={editEventData.location_name} onChange={e => setEditEventData({...editEventData, location_name: e.target.value})} />
           </div>
           <div className="form-group">
-            <label className="form-label mb-sm">Volunteer Visibility</label>
+            <label className="form-label mb-sm">{t('event_form.volunteer_visibility')}</label>
             <button
               type="button"
               className={`visibility-toggle ${editEventData.show_volunteers ? 'active' : ''}`}
@@ -271,17 +273,17 @@ export default function ManageEvent() {
               {editEventData.show_volunteers ? <Eye size={20} color="var(--success-color)" /> : <EyeOff size={20} color="var(--text-muted)" />}
               <div className="text-left">
                 <div className="visibility-toggle-title">
-                  {editEventData.show_volunteers ? 'Volunteers are visible' : 'Volunteers are hidden'}
+                  {editEventData.show_volunteers ? t('event_form.volunteers_visible') : t('event_form.volunteers_hidden')}
                 </div>
                 <div className="visibility-toggle-desc">
-                  {editEventData.show_volunteers ? 'Anyone can see who signed up for each shift' : 'Only organizers can see the volunteer list'}
+                  {editEventData.show_volunteers ? t('event_form.volunteers_visible_desc') : t('event_form.volunteers_hidden_desc')}
                 </div>
               </div>
             </button>
           </div>
           <div className="flex gap-sm justify-end mt-md">
-            <button type="button" onClick={() => setIsEditingEvent(false)} className="btn"><X size={16} /> Cancel</button>
-            <button type="submit" className="btn btn-primary"><Save size={16} /> Save Changes</button>
+            <button type="button" onClick={() => setIsEditingEvent(false)} className="btn"><X size={16} /> {t('event_form.cancel')}</button>
+            <button type="submit" className="btn btn-primary"><Save size={16} /> {t('manage_event.save_changes')}</button>
           </div>
         </form>
       ) : (
@@ -293,18 +295,18 @@ export default function ManageEvent() {
             {event.location_name && ` • ${event.location_name}`}
           </div>
           <div className={`mt-sm p-xs badge ${event.show_volunteers ? 'badge-success' : ''}`}>
-            {event.show_volunteers ? <><Eye size={14} className="mr-sm" /> Volunteers visible to everyone</> : <><EyeOff size={14} className="mr-sm" /> Volunteers hidden from users</>}
+            {event.show_volunteers ? <><Eye size={14} className="mr-sm" /> {t('manage_event.volunteers_visible_badge')}</> : <><EyeOff size={14} className="mr-sm" /> {t('manage_event.volunteers_hidden_badge')}</>}
           </div>
         </div>
       )}
 
       <div className="flex justify-between items-center mb-lg">
         <h2 className="text-2xl font-bold flex items-center gap-sm">
-          <Users size={24} color="var(--accent-color)" /> Schedule Slots & Volunteers
+          <Users size={24} color="var(--accent-color)" /> {t('manage_event.schedule_slots')}
         </h2>
         {!isAddingSlot && (
           <button onClick={openAddSlot} className="btn btn-primary p-sm">
-            <Plus size={16} /> Add Slot
+            <Plus size={16} /> {t('manage_event.add_slot')}
           </button>
         )}
       </div>
@@ -313,9 +315,10 @@ export default function ManageEvent() {
         <SlotForm 
           onSubmit={handleCreateSlot} 
           onCancel={() => setIsAddingSlot(false)} 
-          submitText="Create Slot" 
+          submitText={t('manage_event.create_slot')} 
           formData={slotFormData}
           setFormData={setSlotFormData}
+          t={t}
         />
       )}
 
@@ -325,9 +328,10 @@ export default function ManageEvent() {
             <SlotForm 
               onSubmit={handleUpdateSlot} 
               onCancel={() => setEditingSlotId(null)} 
-              submitText="Save Slot" 
+              submitText={t('manage_event.save_slot')} 
               formData={slotFormData}
               setFormData={setSlotFormData}
+              t={t}
             />
           ) : (
             <div className="card mb-lg" style={{ borderLeft: '4px solid var(--accent-color)' }}>
@@ -335,20 +339,20 @@ export default function ManageEvent() {
                 <div>
                   <h3 className="text-xl font-bold">{slot.title}</h3>
                   <div className="text-sm text-secondary mt-xs">
-                    {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time)}
+                    {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time, t)}
                   </div>
                   { (slot.buffer_before > 0 || slot.buffer_after > 0) && (
                     <div className="text-xs text-muted mt-xs flex items-center gap-xs">
-                      Preparation:
-                      {slot.buffer_before > 0 && <span>+{slot.buffer_before}m before</span>}
-                      {slot.buffer_after > 0 && <span>+{slot.buffer_after}m after</span>}
+                      {t('manage_event.preparation')}:
+                      {slot.buffer_before > 0 && <span>+{slot.buffer_before}m {t('manage_event.before')}</span>}
+                      {slot.buffer_after > 0 && <span>+{slot.buffer_after}m {t('manage_event.after')}</span>}
                       {slot.show_buffer ? <Eye size={12} title="Visible to volunteers" /> : <EyeOff size={12} title="Hidden from volunteers" />}
                     </div>
                   )}
                 </div>
                 <div className="flex items-center gap-md">
                   <span className="badge">
-                    Capacity: {attendees[slot.id]?.length || 0} / {slot.capacity}
+                    {t('manage_event.capacity')}: {attendees[slot.id]?.length || 0} / {slot.capacity}
                   </span>
                   <div className="flex gap-sm">
                     <button onClick={() => openEditSlot(slot)} className="btn p-sm" style={{ border: 'none' }} title="Edit Slot"><Edit2 size={16} /></button>
@@ -362,11 +366,11 @@ export default function ManageEvent() {
 
               <div className="p-md" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)' }}>
                 <h4 className="text-sm font-bold text-secondary mb-sm uppercase" style={{ letterSpacing: '0.05em' }}>
-                  Subscribed Volunteers
+                  {t('manage_event.subscribed_volunteers')}
                 </h4>
                 
                 {!attendees[slot.id] || attendees[slot.id].length === 0 ? (
-                  <p className="text-sm text-muted italic">No volunteers subscribed yet.</p>
+                  <p className="text-sm text-muted italic">{t('manage_event.no_volunteers')}</p>
                 ) : (
                   <div className="grid gap-sm">
                     {attendees[slot.id]?.map(user => (
@@ -388,14 +392,16 @@ export default function ManageEvent() {
         show={confirmDelete.show} 
         onClose={() => setConfirmDelete({ show: false, type: null, id: null, title: '' })} 
         onConfirm={handleConfirmDelete}
-        title={confirmDelete.type === 'event' ? 'Delete Event' : 'Delete Slot'}
-        message={`Are you sure you want to delete "${confirmDelete.title}"? This action cannot be undone.`}
+        title={confirmDelete.type === 'event' ? t('manage_event.delete_event') : t('manage_event.delete_slot')}
+        message={t('manage_event.confirm_delete_msg', { title: confirmDelete.title })}
+        cancelText={t('event_form.cancel')}
+        deleteText={t('manage_event.delete')}
       />
     </div>
   );
 }
 
-const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => {
+const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData, t }) => {
   const handleStartTimeChange = (e) => {
     const newStartTime = e.target.value;
     setFormData(prev => {
@@ -418,42 +424,42 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
     <form onSubmit={onSubmit} className="p-md mb-lg" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
     <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
       <div>
-        <label className="form-label">Slot Title</label>
+        <label className="form-label">{t('event_form.slot_title')}</label>
         <input 
           type="text" 
           className="input-field" 
           required 
           value={formData.title} 
           onChange={e => setFormData({...formData, title: e.target.value})} 
-          placeholder="E.g., Setup Team" 
+          placeholder={t('event_form.slot_title_placeholder')} 
         />
       </div>
       <div>
-        <label className="form-label">Description (Optional)</label>
+        <label className="form-label">{t('event_form.slot_desc')}</label>
         <textarea 
           className="input-field" 
           rows="2" 
           value={formData.description} 
           onChange={e => setFormData({...formData, description: e.target.value})} 
-          placeholder="Duties" 
+          placeholder={t('event_form.slot_desc_placeholder')} 
         ></textarea>
       </div>
     </div>
 
     <div className="mb-md">
-      <label className="form-label">On-site Location (Optional)</label>
+      <label className="form-label">{t('event_form.onsite_location')}</label>
       <input 
         type="text" 
         className="input-field" 
         value={formData.location || ''} 
         onChange={e => setFormData({...formData, location: e.target.value})} 
-        placeholder="E.g., Front Gate, Registration Desk" 
+        placeholder={t('event_form.onsite_location_placeholder')} 
       />
     </div>
     
     <div className="grid gap-md mb-sm flex-responsive" style={{ gridTemplateColumns: '1fr 1fr 100px' }}>
       <div>
-        <label className="form-label">Start Time</label>
+        <label className="form-label">{t('event_form.start_time')}</label>
         <input 
           type="datetime-local" 
           className="input-field" 
@@ -463,7 +469,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
         />
       </div>
       <div>
-        <label className="form-label">End Time</label>
+        <label className="form-label">{t('event_form.end_time')}</label>
         <input 
           type="datetime-local" 
           className="input-field" 
@@ -473,7 +479,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
         />
       </div>
       <div>
-        <label className="form-label">Capacity</label>
+        <label className="form-label">{t('event_form.capacity')}</label>
         <input 
           type="number" 
           className="input-field" 
@@ -486,7 +492,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
     </div>
     <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
       <div>
-        <label className="form-label">Buffer Before (minutes)</label>
+        <label className="form-label">{t('event_form.buffer_before')}</label>
         <input 
           type="number" 
           className="input-field" 
@@ -497,7 +503,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
         />
       </div>
       <div>
-        <label className="form-label">Buffer After (minutes)</label>
+        <label className="form-label">{t('event_form.buffer_after')}</label>
         <input 
           type="number" 
           className="input-field" 
@@ -511,13 +517,13 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
 
     <div className="grid grid-cols-2 gap-md mb-sm flex-responsive">
       <div>
-        <label className="form-label">Requirements (Optional)</label>
+        <label className="form-label">{t('event_form.requirements')}</label>
         <input 
           type="text" 
           className="input-field" 
           value={formData.requirements} 
           onChange={e => setFormData({...formData, requirements: e.target.value})} 
-          placeholder="Skills needed" 
+          placeholder={t('event_form.requirements_placeholder')} 
         />
       </div>
       <div className="flex items-center" style={{ paddingTop: '1.5rem' }}>
@@ -527,19 +533,19 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
             checked={formData.show_buffer} 
             onChange={e => setFormData({...formData, show_buffer: e.target.checked})} 
           />
-          Show buffer time to volunteers
+          {t('event_form.show_buffer')}
         </label>
       </div>
     </div>
     <div className="flex gap-sm justify-end">
-      <button type="button" onClick={onCancel} className="btn"><X size={16} /> Cancel</button>
+      <button type="button" onClick={onCancel} className="btn"><X size={16} /> {t('event_form.cancel')}</button>
       <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
     </div>
   </form>
   );
 };
 
-const ConfirmModal = ({ show, onClose, onConfirm, title, message }) => {
+const ConfirmModal = ({ show, onClose, onConfirm, title, message, cancelText, deleteText }) => {
   if (!show) return null;
 
   return (
@@ -556,8 +562,8 @@ const ConfirmModal = ({ show, onClose, onConfirm, title, message }) => {
         <h2 className="text-2xl font-bold mb-md">{title}</h2>
         <p className="text-secondary mb-xl">{message}</p>
         <div className="flex gap-md justify-center">
-          <button onClick={onClose} className="btn w-full">Cancel</button>
-          <button onClick={onConfirm} className="btn btn-danger w-full">Delete</button>
+          <button onClick={onClose} className="btn w-full">{cancelText}</button>
+          <button onClick={onConfirm} className="btn btn-danger w-full">{deleteText}</button>
         </div>
       </div>
     </div>
