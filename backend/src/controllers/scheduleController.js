@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 // Create a schedule slot for an event
 export const createScheduleSlot = async (req, res) => {
   try {
-    const { event_id, title, description, location, start_time, end_time, capacity, requirements } = req.body;
+    const { event_id, title, description, location, start_time, end_time, capacity, requirements, buffer_before, buffer_after, show_buffer } = req.body;
     
     // Verify event ownership
     const event = await prisma.event.findUnique({ where: { id: parseInt(event_id) } });
@@ -23,7 +23,10 @@ export const createScheduleSlot = async (req, res) => {
         start_time: new Date(start_time),
         end_time: new Date(end_time),
         capacity: parseInt(capacity),
-        requirements: requirements || null
+        requirements: requirements || null,
+        buffer_before: buffer_before ? parseInt(buffer_before) : 0,
+        buffer_after: buffer_after ? parseInt(buffer_after) : 0,
+        show_buffer: show_buffer !== undefined ? Boolean(show_buffer) : false
       }
     });
     res.status(201).json(slot);
@@ -123,7 +126,7 @@ export const getSlotAttendees = async (req, res) => {
 export const updateScheduleSlot = async (req, res) => {
   try {
     const { slotId } = req.params;
-    const { title, description, location, start_time, end_time, capacity, requirements } = req.body;
+    const { title, description, location, start_time, end_time, capacity, requirements, buffer_before, buffer_after, show_buffer } = req.body;
     
     const slot = await prisma.scheduleSlot.findUnique({
       where: { id: parseInt(slotId) },
@@ -144,7 +147,10 @@ export const updateScheduleSlot = async (req, res) => {
         start_time: start_time ? new Date(start_time) : undefined,
         end_time: end_time ? new Date(end_time) : undefined,
         capacity: capacity ? parseInt(capacity) : undefined,
-        requirements
+        requirements,
+        buffer_before: buffer_before !== undefined ? parseInt(buffer_before) : undefined,
+        buffer_after: buffer_after !== undefined ? parseInt(buffer_after) : undefined,
+        show_buffer: show_buffer !== undefined ? Boolean(show_buffer) : undefined
       }
     });
 

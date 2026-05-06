@@ -173,6 +173,16 @@ export default function EventDetails() {
                       <Clock size={16} /> 
                       {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time)}
                     </div>
+                    {slot.show_buffer && (slot.buffer_before > 0 || slot.buffer_after > 0) && (
+                      <div className="text-sm text-secondary mb-sm flex items-center gap-sm">
+                        <Clock size={16} style={{ visibility: 'hidden' }} />
+                        <span className="text-muted italic">
+                          Preparation: 
+                          {slot.buffer_before > 0 && ` +${slot.buffer_before}m before`}
+                          {slot.buffer_after > 0 && ` +${slot.buffer_after}m after`}
+                        </span>
+                      </div>
+                    )}
                     {slot.location && (
                       <div className="text-sm text-secondary mb-sm flex items-center gap-sm">
                         <MapPin size={16} /> {slot.location}

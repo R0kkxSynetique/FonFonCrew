@@ -56,6 +56,9 @@ model ScheduleSlot {
   end_time      DateTime
   capacity      Int
   requirements  String?
+  buffer_before Int            @default(0)
+  buffer_after  Int            @default(0)
+  show_buffer   Boolean        @default(false)
   subscriptions Subscription[]
 }
 

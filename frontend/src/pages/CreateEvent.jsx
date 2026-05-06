@@ -25,7 +25,10 @@ export default function CreateEvent() {
       start_time: formData.start_date || '', 
       end_time: formData.end_date || '', 
       capacity: 5, 
-      requirements: '' 
+      requirements: '',
+      buffer_before: 0,
+      buffer_after: 0,
+      show_buffer: false
     }]);
   };
 
@@ -169,7 +172,7 @@ export default function CreateEvent() {
               <input type="text" className="input-field" value={slot.location || ''} onChange={e => handleSlotChange(index, 'location', e.target.value)} placeholder="E.g., Front Gate, Registration Desk" />
             </div>
             
-            <div className="grid grid-cols-3 gap-md mb-sm flex-responsive" style={{ gridTemplateColumns: '1fr 1fr 100px' }}>
+            <div className="grid gap-md mb-sm flex-responsive" style={{ gridTemplateColumns: '1fr 1fr 100px' }}>
               <div>
                 <label className="form-label">Start Time</label>
                 <input type="datetime-local" className="input-field" required value={slot.start_time} onChange={e => handleSlotChange(index, 'start_time', e.target.value)} />
@@ -183,9 +186,29 @@ export default function CreateEvent() {
                 <input type="number" className="input-field" required min="1" value={slot.capacity} onChange={e => handleSlotChange(index, 'capacity', e.target.value)} />
               </div>
             </div>
-            <div>
-              <label className="form-label">Requirements (Optional)</label>
-              <input type="text" className="input-field" value={slot.requirements} onChange={e => handleSlotChange(index, 'requirements', e.target.value)} placeholder="E.g. Heavy lifting, cooking skills" />
+            
+            <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
+              <div>
+                <label className="form-label">Buffer Before (minutes)</label>
+                <input type="number" className="input-field" min="0" value={slot.buffer_before} onChange={e => handleSlotChange(index, 'buffer_before', parseInt(e.target.value) || 0)} placeholder="e.g. 15" />
+              </div>
+              <div>
+                <label className="form-label">Buffer After (minutes)</label>
+                <input type="number" className="input-field" min="0" value={slot.buffer_after} onChange={e => handleSlotChange(index, 'buffer_after', parseInt(e.target.value) || 0)} placeholder="e.g. 15" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-md mb-sm flex-responsive">
+              <div>
+                <label className="form-label">Requirements (Optional)</label>
+                <input type="text" className="input-field" value={slot.requirements} onChange={e => handleSlotChange(index, 'requirements', e.target.value)} placeholder="E.g. Heavy lifting, cooking skills" />
+              </div>
+              <div className="flex items-center" style={{ paddingTop: '1.5rem' }}>
+                <label className="form-label flex items-center gap-sm cursor-pointer mb-0">
+                  <input type="checkbox" checked={slot.show_buffer} onChange={e => handleSlotChange(index, 'show_buffer', e.target.checked)} />
+                  Show buffer time to volunteers
+                </label>
+              </div>
             </div>
           </div>
         ))}

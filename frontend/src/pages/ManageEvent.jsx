@@ -36,7 +36,7 @@ export default function ManageEvent() {
   // Add/Edit Slot State
   const [isAddingSlot, setIsAddingSlot] = useState(false);
   const [editingSlotId, setEditingSlotId] = useState(null);
-  const [slotFormData, setSlotFormData] = useState({ title: '', description: '', location: '', start_time: '', end_time: '', capacity: 5, requirements: '' });
+  const [slotFormData, setSlotFormData] = useState({ title: '', description: '', location: '', start_time: '', end_time: '', capacity: 5, requirements: '', buffer_before: 0, buffer_after: 0, show_buffer: false });
 
   // Confirmation Modal State
   const [confirmDelete, setConfirmDelete] = useState({ show: false, type: null, id: null, title: '' });
@@ -188,7 +188,10 @@ export default function ManageEvent() {
       start_time: toLocalDatetimeLocal(slot.start_time),
       end_time: toLocalDatetimeLocal(slot.end_time),
       capacity: slot.capacity,
-      requirements: slot.requirements || ''
+      requirements: slot.requirements || '',
+      buffer_before: slot.buffer_before || 0,
+      buffer_after: slot.buffer_after || 0,
+      show_buffer: slot.show_buffer || false
     });
     setEditingSlotId(slot.id);
     setIsAddingSlot(false);
@@ -202,7 +205,10 @@ export default function ManageEvent() {
       start_time: event ? toLocalDatetimeLocal(event.start_date) : '', 
       end_time: event ? toLocalDatetimeLocal(event.end_date) : '', 
       capacity: 5, 
-      requirements: '' 
+      requirements: '',
+      buffer_before: 0,
+      buffer_after: 0,
+      show_buffer: false
     });
     setIsAddingSlot(true);
     setEditingSlotId(null);
@@ -331,6 +337,14 @@ export default function ManageEvent() {
                   <div className="text-sm text-secondary mt-xs">
                     {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time)}
                   </div>
+                  { (slot.buffer_before > 0 || slot.buffer_after > 0) && (
+                    <div className="text-xs text-muted mt-xs flex items-center gap-xs">
+                      Preparation:
+                      {slot.buffer_before > 0 && <span>+{slot.buffer_before}m before</span>}
+                      {slot.buffer_after > 0 && <span>+{slot.buffer_after}m after</span>}
+                      {slot.show_buffer ? <Eye size={12} title="Visible to volunteers" /> : <EyeOff size={12} title="Hidden from volunteers" />}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-md">
                   <span className="badge">
@@ -470,15 +484,52 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData }) => 
         />
       </div>
     </div>
-    <div className="mb-md">
-      <label className="form-label">Requirements (Optional)</label>
-      <input 
-        type="text" 
-        className="input-field" 
-        value={formData.requirements} 
-        onChange={e => setFormData({...formData, requirements: e.target.value})} 
-        placeholder="Skills needed" 
-      />
+    <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
+      <div>
+        <label className="form-label">Buffer Before (minutes)</label>
+        <input 
+          type="number" 
+          className="input-field" 
+          min="0" 
+          value={formData.buffer_before} 
+          onChange={e => setFormData({...formData, buffer_before: parseInt(e.target.value) || 0})} 
+          placeholder="e.g. 15" 
+        />
+      </div>
+      <div>
+        <label className="form-label">Buffer After (minutes)</label>
+        <input 
+          type="number" 
+          className="input-field" 
+          min="0" 
+          value={formData.buffer_after} 
+          onChange={e => setFormData({...formData, buffer_after: parseInt(e.target.value) || 0})} 
+          placeholder="e.g. 15" 
+        />
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-md mb-sm flex-responsive">
+      <div>
+        <label className="form-label">Requirements (Optional)</label>
+        <input 
+          type="text" 
+          className="input-field" 
+          value={formData.requirements} 
+          onChange={e => setFormData({...formData, requirements: e.target.value})} 
+          placeholder="Skills needed" 
+        />
+      </div>
+      <div className="flex items-center" style={{ paddingTop: '1.5rem' }}>
+        <label className="form-label flex items-center gap-sm cursor-pointer mb-0">
+          <input 
+            type="checkbox" 
+            checked={formData.show_buffer} 
+            onChange={e => setFormData({...formData, show_buffer: e.target.checked})} 
+          />
+          Show buffer time to volunteers
+        </label>
+      </div>
     </div>
     <div className="flex gap-sm justify-end">
       <button type="button" onClick={onCancel} className="btn"><X size={16} /> Cancel</button>
