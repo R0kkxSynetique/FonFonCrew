@@ -4,19 +4,11 @@ import axios from 'axios';
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const [authStatus, setAuthStatus] = useState('checking'); // 'checking', 'authorized', 'unauthorized', 'login'
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const verifyUser = async () => {
-      if (!token) {
-        setAuthStatus('login');
-        return;
-      }
-
       try {
-        const res = await axios.get('http://localhost:3001/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get('http://localhost:3001/api/auth/me');
         
         const user = res.data;
         // Keep local storage in sync with actual backend truth
@@ -29,14 +21,13 @@ const ProtectedRoute = ({ allowedRoles }) => {
         }
       } catch (err) {
         // Token is invalid or expired
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
         setAuthStatus('login');
       }
     };
 
     verifyUser();
-  }, [token, allowedRoles]);
+  }, [allowedRoles]);
 
   if (authStatus === 'checking') {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'var(--text-secondary)' }}>Loading...</div>;

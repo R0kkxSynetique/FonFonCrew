@@ -1,14 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, LogOut, UserPlus, CalendarDays } from 'lucide-react';
+import axios from 'axios';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  // We'll mock auth state for UI first, will connect to real auth later
-  const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:3001/api/auth/logout');
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
     localStorage.removeItem('user');
     navigate('/login');
   };
@@ -28,7 +31,7 @@ const Navbar = () => {
       </Link>
       
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        {token ? (
+        {user ? (
           <>
             <span style={{ color: 'var(--text-secondary)' }}>Hello, {user?.firstname}</span>
             <Link to="/dashboard" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem' }}>Dashboard</Link>

@@ -55,12 +55,9 @@ export default function ManageEvent() {
         show_volunteers: res.data.show_volunteers ?? false,
       });
       
-      const token = localStorage.getItem('token');
       const attendeesData = {};
       for (const slot of res.data.schedules) {
-        const attRes = await axios.get(`http://localhost:3001/api/schedules/${slot.id}/attendees`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const attRes = await axios.get(`http://localhost:3001/api/schedules/${slot.id}/attendees`);
         attendeesData[slot.id] = attRes.data;
       }
       setAttendees(attendeesData);
@@ -79,8 +76,7 @@ export default function ManageEvent() {
 
   const handleDeleteEvent = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3001/api/events/${eventId}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`http://localhost:3001/api/events/${eventId}`);
       navigate('/dashboard');
     } catch (err) {
       alert('Failed to delete event');
@@ -108,8 +104,7 @@ export default function ManageEvent() {
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:3001/api/events/${eventId}`, editEventData, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`http://localhost:3001/api/events/${eventId}`, editEventData);
       setIsEditingEvent(false);
       fetchEventDetails();
     } catch (err) {
@@ -120,8 +115,7 @@ export default function ManageEvent() {
   const handleCreateSlot = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.post('http://localhost:3001/api/schedules', { ...slotFormData, event_id: eventId }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('http://localhost:3001/api/schedules', { ...slotFormData, event_id: eventId });
       setIsAddingSlot(false);
       fetchEventDetails();
     } catch (err) {
@@ -132,8 +126,7 @@ export default function ManageEvent() {
   const handleUpdateSlot = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:3001/api/schedules/${editingSlotId}`, slotFormData, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`http://localhost:3001/api/schedules/${editingSlotId}`, slotFormData);
       setEditingSlotId(null);
       fetchEventDetails();
     } catch (err) {
@@ -143,8 +136,7 @@ export default function ManageEvent() {
 
   const handleDeleteSlot = async (slotId) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3001/api/schedules/${slotId}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`http://localhost:3001/api/schedules/${slotId}`);
       fetchEventDetails();
     } catch (err) {
       console.error('Delete failed:', err.response?.data || err.message);

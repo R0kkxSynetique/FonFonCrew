@@ -60,9 +60,15 @@ export const login = async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
     res.json({
       message: 'Login successful',
-      token,
       user: {
         id: user.id,
         firstname: user.firstname,
@@ -75,6 +81,15 @@ export const login = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Login failed' });
   }
+};
+
+export const logout = (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  });
+  res.json({ message: 'Logged out successfully' });
 };
 
 export const getMe = async (req, res) => {

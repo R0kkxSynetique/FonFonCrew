@@ -73,18 +73,13 @@ export default function CreateEvent() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
       // 1. Create Event
-      const res = await axios.post('http://localhost:3001/api/events', formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.post('http://localhost:3001/api/events', formData);
       const eventId = res.data.id;
 
       // 2. Create Slots
       await Promise.all(slots.map(slot => 
-        axios.post('http://localhost:3001/api/schedules', { ...slot, event_id: eventId }, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        axios.post('http://localhost:3001/api/schedules', { ...slot, event_id: eventId })
       ));
 
       alert('Event created successfully!');

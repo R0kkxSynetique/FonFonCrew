@@ -45,14 +45,11 @@ export default function EventDetails() {
 
   const subscribeToSlot = async (slotId) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
+      if (!user) {
         navigate('/login');
         return;
       }
-      await axios.post(`http://localhost:3001/api/schedules/${slotId}/subscriptions`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post(`http://localhost:3001/api/schedules/${slotId}/subscriptions`, {});
       showNotification('Successfully subscribed!', 'success');
       await fetchEventDetails();
     } catch (err) {
@@ -72,14 +69,11 @@ export default function EventDetails() {
     setSlotToUnsubscribe(null);
     
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
+      if (!user) {
         navigate('/login');
         return;
       }
-      await axios.delete(`http://localhost:3001/api/schedules/${slotId}/subscriptions`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`http://localhost:3001/api/schedules/${slotId}/subscriptions`);
       setHoveredSlot(null);
       await fetchEventDetails();
       showNotification('Successfully unsubscribed!', 'success');

@@ -24,15 +24,7 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const res = await axios.get('http://localhost:3001/api/users', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get('http://localhost:3001/api/users');
       setUsers(res.data);
     } catch (err) {
       if (err.response?.status === 403 || err.response?.status === 401) {
@@ -72,16 +64,11 @@ export default function UserManagement() {
   const handleUserSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
       if (editingUser) {
-        await axios.put(`http://localhost:3001/api/users/${editingUser.id}`, formData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.put(`http://localhost:3001/api/users/${editingUser.id}`, formData);
         showNotification('User updated successfully', 'success');
       } else {
-        await axios.post('http://localhost:3001/api/users', formData, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await axios.post('http://localhost:3001/api/users', formData);
         showNotification('User created successfully', 'success');
       }
       setShowUserModal(false);
@@ -107,10 +94,7 @@ export default function UserManagement() {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`http://localhost:3001/api/users/${userId}/role`, { role: newRole }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(`http://localhost:3001/api/users/${userId}/role`, { role: newRole });
       showNotification('User role updated successfully', 'success');
       fetchUsers();
     } catch (err) {
@@ -130,10 +114,7 @@ export default function UserManagement() {
     setUserToDelete(null);
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:3001/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`http://localhost:3001/api/users/${userId}`);
       showNotification('User deleted successfully', 'success');
       fetchUsers();
     } catch (err) {
