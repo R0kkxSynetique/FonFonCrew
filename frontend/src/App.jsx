@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import './index.css';
 
 // Layout & Pages
@@ -20,6 +21,7 @@ function App() {
   return (
     <Router>
       <div className="app-container">
+        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         <Navbar />
         <main className="main-content">
           <Routes>
@@ -55,5 +57,6 @@ function App() {
     </Router>
   );
 }
+
 
 export default App;

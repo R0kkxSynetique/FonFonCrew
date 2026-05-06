@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, ArrowLeft, Trash2, Edit2, Plus, X, Save, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { format, differenceInMinutes } from 'date-fns';
 
 const formatDuration = (start, end) => {
@@ -50,7 +51,7 @@ export default function ManageEvent() {
       
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (res.data.organizer_id !== user.id && user.role !== 'SUPERADMIN') {
-         alert('You do not have permission to manage this event.');
+         toast.error('You do not have permission to manage this event.');
          navigate(`/events/${eventId}`);
          return;
       }
@@ -81,11 +82,11 @@ export default function ManageEvent() {
     } catch (err) {
       console.error(err);
       if (err.response && (err.response.status === 403 || err.response.status === 401)) {
-        alert('You do not have permission to manage this event.');
+        toast.error('You do not have permission to manage this event.');
         navigate(`/events/${eventId}`);
         return;
       }
-      alert('Failed to load event details.');
+      toast.error('Failed to load event details.');
     } finally {
       setLoading(false);
     }
@@ -94,9 +95,10 @@ export default function ManageEvent() {
   const handleDeleteEvent = async () => {
     try {
       await axios.delete(`/events/${eventId}`);
+      toast.success('Event deleted successfully');
       navigate('/dashboard');
     } catch (err) {
-      alert('Failed to delete event');
+      toast.error('Failed to delete event');
     }
   };
 
@@ -123,9 +125,10 @@ export default function ManageEvent() {
     try {
       await axios.put(`/events/${eventId}`, editEventData);
       setIsEditingEvent(false);
+      toast.success('Event updated successfully');
       fetchEventDetails();
     } catch (err) {
-      alert('Failed to update event details');
+      toast.error('Failed to update event details');
     }
   };
 
@@ -134,9 +137,10 @@ export default function ManageEvent() {
     try {
       await axios.post('/schedules', { ...slotFormData, event_id: eventId });
       setIsAddingSlot(false);
+      toast.success('Slot created successfully');
       fetchEventDetails();
     } catch (err) {
-      alert('Failed to create slot');
+      toast.error('Failed to create slot');
     }
   };
 
@@ -145,19 +149,21 @@ export default function ManageEvent() {
     try {
       await axios.put(`/schedules/${editingSlotId}`, slotFormData);
       setEditingSlotId(null);
+      toast.success('Slot updated successfully');
       fetchEventDetails();
     } catch (err) {
-      alert('Failed to update slot');
+      toast.error('Failed to update slot');
     }
   };
 
   const handleDeleteSlot = async (slotId) => {
     try {
       await axios.delete(`/schedules/${slotId}`);
+      toast.success('Slot deleted successfully');
       fetchEventDetails();
     } catch (err) {
       console.error('Delete failed:', err.response?.data || err.message);
-      alert('Failed to delete slot');
+      toast.error('Failed to delete slot');
     }
   };
 

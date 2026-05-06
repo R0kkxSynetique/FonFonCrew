@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CalendarDays, MapPin, AlignLeft, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -82,10 +83,10 @@ export default function CreateEvent() {
         axios.post('/schedules', { ...slot, event_id: eventId })
       ));
 
-      alert('Event created successfully!');
+      toast.success('Event created successfully!');
       navigate('/dashboard');
     } catch (err) {
-      alert('Failed to create event or slots.');
+      toast.error('Failed to create event or slots.');
       console.error(err);
     } finally {
       setLoading(false);

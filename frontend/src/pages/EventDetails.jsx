@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Users, ArrowLeft, Calendar, MapPin, Clock, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { format, differenceInMinutes } from 'date-fns';
 
 const formatDuration = (start, end) => {
@@ -24,7 +25,6 @@ export default function EventDetails() {
   const [hoveredSlot, setHoveredSlot] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [slotToUnsubscribe, setSlotToUnsubscribe] = useState(null);
-  const [notification, setNotification] = useState(null);
   const [showVolunteers, setShowVolunteers] = useState(false);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function EventDetails() {
       setAttendees(attendeesData);
     } catch (err) {
       console.error(err);
-      alert('Failed to load event details.');
+      toast.error('Failed to load event details.');
     } finally {
       setLoading(false);
     }
@@ -60,10 +60,10 @@ export default function EventDetails() {
         return;
       }
       await axios.post(`/schedules/${slotId}/subscriptions`, {});
-      showNotification('Successfully subscribed!', 'success');
+      toast.success('Successfully subscribed!');
       await fetchEventDetails();
     } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to subscribe', 'error');
+      toast.error(err.response?.data?.error || 'Failed to subscribe');
     }
   };
 
@@ -86,15 +86,10 @@ export default function EventDetails() {
       await axios.delete(`/schedules/${slotId}/subscriptions`);
       setHoveredSlot(null);
       await fetchEventDetails();
-      showNotification('Successfully unsubscribed!', 'success');
+      toast.success('Successfully unsubscribed!');
     } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to unsubscribe', 'error');
+      toast.error(err.response?.data?.error || 'Failed to unsubscribe');
     }
-  };
-
-  const showNotification = (msg, type) => {
-    setNotification({ msg, type });
-    setTimeout(() => setNotification(null), 3000);
   };
 
   const isUserSubscribed = (slotId) => {
@@ -279,17 +274,6 @@ export default function EventDetails() {
         </div>
       )}
 
-      {/* Notification Toast */}
-      {notification && (
-        <div style={{ 
-          position: 'fixed', bottom: '2rem', right: '2rem', padding: '1rem 1.5rem', 
-          backgroundColor: notification.type === 'success' ? 'var(--success-color)' : 'var(--danger-color)', 
-          color: 'white', borderRadius: 'var(--radius-md)', fontWeight: 'bold', zIndex: 1100, 
-          boxShadow: 'var(--shadow-lg)', animation: 'fadeIn 0.3s ease-out'
-        }}>
-          {notification.msg}
-        </div>
-      )}
     </div>
   );
 }
