@@ -1,18 +1,23 @@
 FROM node:20-alpine
 
-WORKDIR /app
+RUN apk add --no-cache tini curl ca-certificates openssl git tar zip unzip bash
 
-COPY package*.json ./
+RUN adduser -D -h /home/container container
+
+ENV USER=container HOME=/home/container
+WORKDIR /home/container
+
+COPY --chown=container:container package*.json ./
 RUN npm ci
 
-COPY . .
-
-# Generate Prisma client (dummy URL — only schema is needed, no real connection)
+COPY --chown=container:container . .
 RUN npx prisma generate
 
-# Make entrypoint executable
 RUN chmod +x docker-entrypoint.sh
+RUN cp docker-entrypoint.sh /entrypoint.sh
+
+USER container
 
 EXPOSE 3001
-
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+CMD ["/entrypoint.sh"]
