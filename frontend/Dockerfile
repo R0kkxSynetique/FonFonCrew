@@ -1,5 +1,4 @@
-# Build stage
-FROM node:20-alpine AS build
+FROM --platform=$TARGETOS/$TARGETARCH node:20-alpine AS build
 
 WORKDIR /app
 
@@ -9,7 +8,6 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Production stage
 FROM nginx:alpine
 
 RUN apk add --no-cache tini curl ca-certificates openssl git tar zip unzip bash

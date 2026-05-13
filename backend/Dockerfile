@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM --platform=$TARGETOS/$TARGETARCH node:20-alpine
 
 RUN apk add --no-cache tini curl ca-certificates openssl git tar zip unzip bash
 
