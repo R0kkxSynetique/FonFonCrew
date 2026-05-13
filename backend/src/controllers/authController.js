@@ -8,16 +8,13 @@ export const register = async (req, res) => {
   try {
     const { firstname, lastname, birthday, email, password, phone } = req.body;
     
-    // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists with this email' });
     }
 
-    // Hash password
     const password_hash = await bcrypt.hash(password, 10);
     
-    // Create User
     const user = await prisma.user.create({
       data: {
         firstname,
@@ -26,7 +23,7 @@ export const register = async (req, res) => {
         email,
         password_hash,
         phone,
-        role: 'VOLUNTEER', // Default role for new sign-ups usually
+        role: 'VOLUNTEER',
       }
     });
 
@@ -41,19 +38,15 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    // Find user
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Verify Password
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-
-    // Generate JWT
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,

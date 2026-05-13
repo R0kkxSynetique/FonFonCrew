@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import axios from 'axios';
 
 const PublicRoute = () => {
-  const [authStatus, setAuthStatus] = useState('checking'); // 'checking', 'authenticated', 'unauthenticated'
+  const [authStatus, setAuthStatus] = useState('checking');
 
   useEffect(() => {
     const verifyUser = async () => {

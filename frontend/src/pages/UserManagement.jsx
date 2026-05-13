@@ -30,7 +30,7 @@ export default function UserManagement() {
       setUsers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       if (err.response?.status === 403 || err.response?.status === 401) {
-        navigate('/dashboard'); // unauthorized
+        navigate('/dashboard');
       } else {
         setError(err.response?.data?.error || t('user_management.error_fetch'));
       }

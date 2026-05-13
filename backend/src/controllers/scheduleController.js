@@ -2,12 +2,10 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Create a schedule slot for an event
 export const createScheduleSlot = async (req, res) => {
   try {
     const { event_id, title, description, location, start_time, end_time, capacity, requirements, buffer_before, buffer_after, show_buffer } = req.body;
     
-    // Verify event ownership
     const event = await prisma.event.findUnique({ where: { id: parseInt(event_id) } });
     if (!event) return res.status(404).json({ error: 'Event not found' });
     if (event.organizer_id !== req.user.userId && req.user.role !== 'SUPERADMIN') {
@@ -36,7 +34,6 @@ export const createScheduleSlot = async (req, res) => {
   }
 };
 
-// Volunteer subscribing to a slot
 export const subscribeToSlot = async (req, res) => {
   try {
     const { slotId } = req.params;
@@ -74,7 +71,6 @@ export const subscribeToSlot = async (req, res) => {
   }
 };
 
-// Volunteer unsubscribing from a slot
 export const unsubscribeFromSlot = async (req, res) => {
   try {
     const { slotId } = req.params;
@@ -91,7 +87,6 @@ export const unsubscribeFromSlot = async (req, res) => {
   }
 };
 
-// Organizer fetching volunteers for a slot
 export const getSlotAttendees = async (req, res) => {
   try {
     const { slotId } = req.params;
@@ -103,7 +98,6 @@ export const getSlotAttendees = async (req, res) => {
 
     if (!slot) return res.status(404).json({ error: 'Slot not found' });
     
-    // Check auth
     if (slot.event.organizer_id !== req.user.userId && req.user.role !== 'SUPERADMIN') {
       return res.status(403).json({ error: 'Forbidden' });
     }
@@ -122,7 +116,6 @@ export const getSlotAttendees = async (req, res) => {
   }
 };
 
-// Organizer updating a schedule slot
 export const updateScheduleSlot = async (req, res) => {
   try {
     const { slotId } = req.params;
@@ -161,7 +154,6 @@ export const updateScheduleSlot = async (req, res) => {
   }
 };
 
-// Organizer deleting a schedule slot
 export const deleteScheduleSlot = async (req, res) => {
   try {
     const { slotId } = req.params;

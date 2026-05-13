@@ -10,8 +10,7 @@ router.get('/:slotId/attendees', verifyToken, requireRole(['ORGANIZER', 'SUPERAD
 router.put('/:slotId', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), updateScheduleSlot);
 router.delete('/:slotId', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), deleteScheduleSlot);
 
-// Accessible by any authenticated user for signing up/down
-// Accessible by any authenticated user for signing up/down
+// Any authenticated user can sign up/down
 router.post('/:slotId/subscriptions', verifyToken, subscribeToSlot);
 router.delete('/:slotId/subscriptions', verifyToken, unsubscribeFromSlot);
 

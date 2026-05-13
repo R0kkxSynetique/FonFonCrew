@@ -73,7 +73,6 @@ export const updateEvent = async (req, res) => {
     const { id } = req.params;
     const { name, description, start_date, end_date, location_name, location_lat, location_lng, show_volunteers } = req.body;
     
-    // Check if user is organizer or admin
     const event = await prisma.event.findUnique({ where: { id: parseInt(id) } });
     if (!event) return res.status(404).json({ error: 'Event not found' });
     if (event.organizer_id !== req.user.userId && req.user.role !== 'SUPERADMIN') {

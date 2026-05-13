@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 import axios from 'axios';
 
 const ProtectedRoute = ({ allowedRoles }) => {
-  const [authStatus, setAuthStatus] = useState('checking'); // 'checking', 'authorized', 'unauthorized', 'login'
+  const [authStatus, setAuthStatus] = useState('checking');
 
   useEffect(() => {
     const verifyUser = async () => {
@@ -12,7 +12,6 @@ const ProtectedRoute = ({ allowedRoles }) => {
         
         if (res.data) {
           const user = res.data;
-          // Keep local storage in sync with actual backend truth
           localStorage.setItem('user', JSON.stringify(user));
 
           if (allowedRoles && !allowedRoles.includes(user.role) && user.role !== 'SUPERADMIN') {
@@ -25,7 +24,6 @@ const ProtectedRoute = ({ allowedRoles }) => {
           setAuthStatus('login');
         }
       } catch (err) {
-        // Token is invalid or expired
         localStorage.removeItem('user');
         setAuthStatus('login');
       }

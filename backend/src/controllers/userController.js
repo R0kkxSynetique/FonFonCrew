@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-// Get all users
 export const getAllUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany({
@@ -26,7 +25,6 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Create a new user
 export const createUser = async (req, res) => {
   try {
     const { firstname, lastname, email, password, role } = req.body;
@@ -67,7 +65,6 @@ export const createUser = async (req, res) => {
   }
 };
 
-// Update user details
 export const updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -111,7 +108,6 @@ export const updateUser = async (req, res) => {
   }
 };
 
-// Update user role
 export const updateUserRole = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -141,14 +137,10 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
-// Delete user
 export const deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Optional: Add safety check to prevent a super admin from deleting themselves if desired,
-    // but the prompt allows demoting and by extension deleting another super admin.
-    // If a user deletes themselves, their token might still be alive until expiry, but future requests will fail if we check DB.
     if (parseInt(userId) === req.user.userId) {
        return res.status(400).json({ error: "You cannot delete your own account this way." });
     }
