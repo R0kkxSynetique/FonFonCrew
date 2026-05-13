@@ -16,7 +16,17 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:5173').split(',').map(o => o.trim());
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      console.warn(`Origin blocked by CORS: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -27,17 +37,14 @@ app.use('/api/events', eventRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/users', userRoutes);
 
-// Routes
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Volunteer App Backend is running' });
 });
 
-// Start Server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// Handle elegant shutdown
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
   process.exit(0);
