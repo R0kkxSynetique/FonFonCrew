@@ -2,8 +2,22 @@
 
 cd /home/container
 
+export DB_TYPE=${DB_TYPE:-postgresql}
+
+if [ "${DB_TYPE}" = "mysql" ]; then
+  DEFAULT_PORT=3306
+else
+  DEFAULT_PORT=5432
+fi
+
 DB_HOST_INTERNAL=${DB_HOST:-db}
-DB_PORT_INTERNAL=${DB_PORT:-5432}
+DB_PORT_INTERNAL=${DB_PORT:-$DEFAULT_PORT}
+
+echo "🔧 Configuring Prisma for database type: ${DB_TYPE}"
+sed -i -E "s/provider[[:space:]]*=[[:space:]]*\"[^\"]*\"/provider = \"${DB_TYPE}\"/" prisma/schema.prisma
+
+echo "📦 Generating Prisma client..."
+npx prisma generate
 
 echo "⏳ Waiting for database at ${DB_HOST_INTERNAL}:${DB_PORT_INTERNAL}..."
 until nc -z "${DB_HOST_INTERNAL}" "${DB_PORT_INTERNAL}" 2>/dev/null; do
