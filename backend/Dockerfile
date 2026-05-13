@@ -13,11 +13,11 @@ RUN npm ci
 COPY --chown=container:container . .
 RUN npx prisma generate
 
-RUN chmod +x docker-entrypoint.sh
-RUN cp docker-entrypoint.sh /entrypoint.sh
+RUN chmod +x entrypoint.sh
+COPY --chown=container:container entrypoint.sh /entrypoint.sh
 
 USER container
 
 EXPOSE 3001
-ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+ENTRYPOINT ["/sbin/tini", "-g", "--"]
 CMD ["/entrypoint.sh"]

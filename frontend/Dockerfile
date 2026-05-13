@@ -32,5 +32,5 @@ USER container
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/tini", "-g", "--"]
+ENTRYPOINT ["/sbin/tini", "-g", "--"]
 CMD ["/entrypoint.sh"]
