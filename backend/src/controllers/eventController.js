@@ -4,6 +4,9 @@ const prisma = new PrismaClient();
 
 export const createEvent = async (req, res) => {
   try {
+    if (!['ORGANIZER', 'SUPERADMIN'].includes(req.user.role)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     const { name, description, start_date, end_date, location_name, location_lat, location_lng, show_volunteers } = req.body;
     const event = await prisma.event.create({
       data: {
@@ -78,6 +81,7 @@ export const getEvents = async (req, res) => {
         location_lng: event.locationLng,
         show_volunteers: event.settings?.showVolunteers ?? false,
         organizer: organizer,
+        organizer_id: ownerMember ? ownerMember.userId : null,
         schedules: event.schedules.map(slot => ({
           id: slot.id,
           eventId: slot.eventId,
@@ -151,6 +155,7 @@ export const getEventById = async (req, res) => {
       location_lng: event.locationLng,
       show_volunteers: event.settings?.showVolunteers ?? false,
       organizer: organizer,
+      organizer_id: ownerMember ? ownerMember.userId : null,
       schedules: event.schedules.map(slot => ({
         id: slot.id,
         eventId: slot.eventId,

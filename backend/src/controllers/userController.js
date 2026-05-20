@@ -46,7 +46,7 @@ export const createUser = async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const globalRole = role === 'SUPERADMIN' ? 'SUPERADMIN' : 'USER';
+    const globalRole = ['ORGANIZER', 'SUPERADMIN'].includes(role) ? role : 'USER';
 
     const user = await prisma.user.create({
       data: {
@@ -94,7 +94,7 @@ export const updateUser = async (req, res) => {
       if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role provided' });
       }
-      dataToUpdate.globalRole = role === 'SUPERADMIN' ? 'SUPERADMIN' : 'USER';
+      dataToUpdate.globalRole = ['ORGANIZER', 'SUPERADMIN'].includes(role) ? role : 'USER';
     }
     
     if (password) {
@@ -139,7 +139,7 @@ export const updateUserRole = async (req, res) => {
       return res.status(400).json({ error: 'Invalid role provided' });
     }
 
-    const globalRole = role === 'SUPERADMIN' ? 'SUPERADMIN' : 'USER';
+    const globalRole = ['ORGANIZER', 'SUPERADMIN'].includes(role) ? role : 'USER';
 
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(userId) },
