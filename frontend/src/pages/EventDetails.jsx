@@ -263,7 +263,7 @@ export default function EventDetails() {
                             transition: 'all 0.2s ease',
                             cursor: 'pointer'
                           }}
-                          title="Click to unsubscribe"
+                          title={t('event_details.click_to_unsubscribe')}
                           onMouseEnter={() => setHoveredSlot(slot.id)}
                           onMouseLeave={() => setHoveredSlot(null)}
                         >

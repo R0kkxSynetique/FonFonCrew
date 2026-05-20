@@ -426,7 +426,7 @@ export default function ManageEvent() {
                           {t('manage_event.preparation')}:
                           {slot.buffer_before > 0 && <span>+{slot.buffer_before}m {t('manage_event.before')}</span>}
                           {slot.buffer_after > 0 && <span>+{slot.buffer_after}m {t('manage_event.after')}</span>}
-                          {slot.show_buffer ? <Eye size={12} title="Visible to volunteers" /> : <EyeOff size={12} title="Hidden from volunteers" />}
+                          {slot.show_buffer ? <Eye size={12} title={t('manage_event.visible_to_volunteers')} /> : <EyeOff size={12} title={t('manage_event.hidden_from_volunteers')} />}
                         </div>
                       )}
                     </div>
@@ -435,14 +435,14 @@ export default function ManageEvent() {
                         {t('manage_event.capacity')}: {attendees[slot.id]?.length || 0} / {slot.capacity}
                       </span>
                       <div className="flex gap-sm">
-                        <button onClick={() => openEditSlot(slot)} className="btn p-sm" style={{ border: 'none' }} title="Edit Slot"><Edit2 size={16} /></button>
-                        <button onClick={() => triggerDeleteConfirm('slot', slot.id, slot.title)} className="btn btn-danger p-sm" style={{ border: 'none' }} title="Delete Slot"><Trash2 size={16} /></button>
+                        <button onClick={() => openEditSlot(slot)} className="btn p-sm" style={{ border: 'none' }} title={t('manage_event.edit_slot')}><Edit2 size={16} /></button>
+                        <button onClick={() => triggerDeleteConfirm('slot', slot.id, slot.title)} className="btn btn-danger p-sm" style={{ border: 'none' }} title={t('manage_event.delete_slot')}><Trash2 size={16} /></button>
                       </div>
                     </div>
                   </div>
 
                   {slot.description && <p className="text-sm text-secondary mb-sm" style={{ whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
-                  {slot.requirements && <p className="text-sm text-muted mb-md">Requirements: {slot.requirements}</p>}
+                  {slot.requirements && <p className="text-sm text-muted mb-md"><span className="font-bold text-muted">{t('event_details.requirements')}:</span> {slot.requirements}</p>}
 
                   <div className="p-md" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)' }}>
                     <h4 className="text-sm font-bold text-secondary mb-sm uppercase" style={{ letterSpacing: '0.05em' }}>
@@ -647,7 +647,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData, t }) 
             min="0"
             value={formData.buffer_before}
             onChange={e => setFormData({ ...formData, buffer_before: parseInt(e.target.value) || 0 })}
-            placeholder="e.g. 15"
+            placeholder={t('event_form.buffer_placeholder')}
           />
         </div>
         <div>
@@ -658,7 +658,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData, t }) 
             min="0"
             value={formData.buffer_after}
             onChange={e => setFormData({ ...formData, buffer_after: parseInt(e.target.value) || 0 })}
-            placeholder="e.g. 15"
+            placeholder={t('event_form.buffer_placeholder')}
           />
         </div>
       </div>
