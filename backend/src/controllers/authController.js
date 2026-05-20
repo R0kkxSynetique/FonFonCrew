@@ -13,7 +13,7 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: 'User already exists with this email' });
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
     
     const user = await prisma.user.create({
       data: {
@@ -21,9 +21,9 @@ export const register = async (req, res) => {
         lastname,
         birthday: birthday ? new Date(birthday) : null,
         email,
-        password_hash,
+        passwordHash,
         phone,
-        role: 'VOLUNTEER',
+        globalRole: 'USER',
       }
     });
 
@@ -43,12 +43,12 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!passwordMatch) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.globalRole },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -67,7 +67,7 @@ export const login = async (req, res) => {
         firstname: user.firstname,
         lastname: user.lastname,
         email: user.email,
-        role: user.role
+        role: user.globalRole
       }
     });
   } catch (error) {
@@ -100,7 +100,7 @@ export const getMe = async (req, res) => {
         birthday: true,
         email: true,
         phone: true,
-        role: true,
+        globalRole: true,
         createdAt: true
       }
     });
@@ -109,7 +109,16 @@ export const getMe = async (req, res) => {
       return res.json(null);
     }
     
-    res.json(user);
+    res.json({
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      birthday: user.birthday,
+      email: user.email,
+      phone: user.phone,
+      role: user.globalRole,
+      createdAt: user.createdAt
+    });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch user data' });
   }

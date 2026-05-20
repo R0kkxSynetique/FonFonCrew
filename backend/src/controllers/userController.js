@@ -11,14 +11,21 @@ export const getAllUsers = async (req, res) => {
         firstname: true,
         lastname: true,
         email: true,
-        role: true,
+        globalRole: true,
         createdAt: true,
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
-    res.json(users);
+    res.json(users.map(user => ({
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      role: user.globalRole,
+      createdAt: user.createdAt
+    })));
   } catch (error) {
     console.error("Error fetching users:", error);
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -38,27 +45,35 @@ export const createUser = async (req, res) => {
       return res.status(400).json({ error: 'User already exists with this email' });
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
+    const globalRole = role === 'SUPERADMIN' ? 'SUPERADMIN' : 'USER';
 
     const user = await prisma.user.create({
       data: {
         firstname,
         lastname,
         email,
-        password_hash,
-        role: role || 'VOLUNTEER',
+        passwordHash,
+        globalRole,
       },
       select: {
         id: true,
         firstname: true,
         lastname: true,
         email: true,
-        role: true,
+        globalRole: true,
         createdAt: true,
       }
     });
 
-    res.status(201).json(user);
+    res.status(201).json({
+      id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      role: user.globalRole,
+      createdAt: user.createdAt
+    });
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: 'Failed to create user' });
@@ -79,11 +94,11 @@ export const updateUser = async (req, res) => {
       if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role provided' });
       }
-      dataToUpdate.role = role;
+      dataToUpdate.globalRole = role === 'SUPERADMIN' ? 'SUPERADMIN' : 'USER';
     }
     
     if (password) {
-      dataToUpdate.password_hash = await bcrypt.hash(password, 10);
+      dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
     }
 
     const updatedUser = await prisma.user.update({
@@ -94,11 +109,17 @@ export const updateUser = async (req, res) => {
         firstname: true,
         lastname: true,
         email: true,
-        role: true,
+        globalRole: true,
       }
     });
 
-    res.json(updatedUser);
+    res.json({
+      id: updatedUser.id,
+      firstname: updatedUser.firstname,
+      lastname: updatedUser.lastname,
+      email: updatedUser.email,
+      role: updatedUser.globalRole
+    });
   } catch (error) {
     console.error("Error updating user:", error);
     if (error.code === 'P2002') {
@@ -118,19 +139,27 @@ export const updateUserRole = async (req, res) => {
       return res.status(400).json({ error: 'Invalid role provided' });
     }
 
+    const globalRole = role === 'SUPERADMIN' ? 'SUPERADMIN' : 'USER';
+
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(userId) },
-      data: { role },
+      data: { globalRole },
       select: {
         id: true,
         firstname: true,
         lastname: true,
         email: true,
-        role: true,
+        globalRole: true,
       }
     });
 
-    res.json(updatedUser);
+    res.json({
+      id: updatedUser.id,
+      firstname: updatedUser.firstname,
+      lastname: updatedUser.lastname,
+      email: updatedUser.email,
+      role: updatedUser.globalRole
+    });
   } catch (error) {
     console.error("Error updating user role:", error);
     res.status(500).json({ error: 'Failed to update user role' });

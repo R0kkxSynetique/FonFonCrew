@@ -16,6 +16,8 @@ RUN npx prisma generate
 RUN chmod +x entrypoint.sh
 COPY --chown=container:container entrypoint.sh /entrypoint.sh
 
+RUN chown -R 1001:1001 "/home/container/.npm"
+
 USER container
 
 EXPOSE 3001

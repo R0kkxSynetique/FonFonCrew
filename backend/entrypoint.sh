@@ -31,6 +31,11 @@ if [ "${RUN_PRISMA_MIGRATIONS}" = "true" ]; then
     npx prisma db push --skip-generate
 fi
 
+if [ "${RUN_PRISMA_SEED}" = "true" ]; then
+    echo "🔄 Running Prisma seed..."
+    npx prisma db seed --
+fi
+
 if [ -z "${STARTUP}" ]; then
     echo "🚀 Starting server with default command..."
     exec node src/server.js

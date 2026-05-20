@@ -7,68 +7,125 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+// Global ACL Roles
+enum GlobalRole {
+  USER
   SUPERADMIN
-  ORGANIZER
-  VOLUNTEER
+}
+
+// Per-Event ACL Roles
+enum EventRole {
+  OWNER         // Can delete event, manage admins
+  COORDINATOR   // Can manage schedules and volunteers
+  VOLUNTEER     // Standard attendee/volunteer
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
+  id            Int               @id @default(autoincrement())
   firstname     String
   lastname      String
   birthday      DateTime?
-  email         String         @unique
-  password_hash String
+  email         String            @unique
+  passwordHash  String            @map("password_hash")
   phone         String?
-  role          Role           @default(VOLUNTEER)
-  events        Event[]        @relation("OrganizerEvents")
+  globalRole    GlobalRole        @default(USER) @map("global_role")
+  
+  // Relations
+  memberships   EventMembership[]
   subscriptions Subscription[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  
+  // Timestamps & Soft Delete
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deletedAt     DateTime?         // Soft delete
+
+  @@map("users")
 }
 
 model Event {
-  id            Int            @id @default(autoincrement())
+  id            Int               @id @default(autoincrement())
   name          String
   description   String?
-  start_date    DateTime
-  end_date      DateTime
-  location_name String?
-  location_lat  Float?
-  location_lng  Float?
-  show_volunteers Boolean        @default(false)
-  organizer_id  Int
-  organizer     User           @relation("OrganizerEvents", fields: [organizer_id], references: [id])
+  startDate     DateTime          @map("start_date")
+  endDate       DateTime          @map("end_date")
+  locationName  String?           @map("location_name")
+  locationLat   Float?            @map("location_lat")
+  locationLng   Float?            @map("location_lng")
+  
+  // Scalability: Store unpredictable future settings or data
+  metadata      Json?             @default("{}")
+  settings      Json?             @default("{\"showVolunteers\": false}")
+  
+  // Relations
+  members       EventMembership[]
   schedules     ScheduleSlot[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  
+  // Timestamps & Soft Delete
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deletedAt     DateTime?
+
+  @@map("events")
+}
+
+// Join Table for Per-Event ACL
+model EventMembership {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  eventId   Int       @map("event_id")
+  role      EventRole @default(VOLUNTEER)
+  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  // A user can only have one defined role per event
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+  @@map("event_memberships")
 }
 
 model ScheduleSlot {
   id            Int            @id @default(autoincrement())
-  event_id      Int
-  event         Event          @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  eventId       Int            @map("event_id")
   title         String         @default("Volunteer Shift")
   description   String?
   location      String?
-  start_time    DateTime
-  end_time      DateTime
+  startTime     DateTime       @map("start_time")
+  endTime       DateTime       @map("end_time")
   capacity      Int
   requirements  String?
-  buffer_before Int            @default(0)
-  buffer_after  Int            @default(0)
-  show_buffer   Boolean        @default(false)
+  bufferBefore  Int            @default(0) @map("buffer_before")
+  bufferAfter   Int            @default(0) @map("buffer_after")
+  showBuffer    Boolean        @default(false) @map("show_buffer")
+  
+  // Relations
+  event         Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
   subscriptions Subscription[]
+  
+  // Timestamps & Soft Delete
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  @@index([eventId])
+  @@map("schedule_slots")
 }
 
 model Subscription {
-  id               Int          @id @default(autoincrement())
-  user_id          Int
-  user             User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  schedule_slot_id Int
-  schedule         ScheduleSlot @relation(fields: [schedule_slot_id], references: [id], onDelete: Cascade)
-  createdAt        DateTime     @default(now())
+  id             Int          @id @default(autoincrement())
+  userId         Int          @map("user_id")
+  scheduleSlotId Int          @map("schedule_slot_id")
   
-  @@unique([user_id, schedule_slot_id])
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedule       ScheduleSlot @relation(fields: [scheduleSlotId], references: [id], onDelete: Cascade)
+  
+  createdAt      DateTime     @default(now())
+  deletedAt      DateTime?    // Allows users to "cancel" without losing historical data
+  
+  @@unique([userId, scheduleSlotId])
+  @@index([userId])
+  @@index([scheduleSlotId])
+  @@map("subscriptions")
 }

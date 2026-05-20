@@ -7,7 +7,8 @@
     "dev": "dotenv -e ../.env -e .env -x -- nodemon src/server.js",
     "prisma:migrate": "dotenv -e ../.env -e .env -x -- prisma migrate dev",
     "prisma:studio": "dotenv -e ../.env -e .env -x -- prisma studio",
-    "prisma:generate": "dotenv -e ../.env -e .env -x -- prisma generate"
+    "prisma:generate": "dotenv -e ../.env -e .env -x -- prisma generate",
+    "prisma:seed": "dotenv -e ../.env -e .env -x -- prisma db seed"
   },
   "keywords": [],
   "author": "",

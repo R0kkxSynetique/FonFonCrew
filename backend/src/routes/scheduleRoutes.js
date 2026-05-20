@@ -5,10 +5,10 @@ import { createScheduleSlot, subscribeToSlot, unsubscribeFromSlot, getSlotAttend
 const router = Router();
 
 // Organizers / Admin
-router.post('/', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), createScheduleSlot);
-router.get('/:slotId/attendees', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), getSlotAttendees);
-router.put('/:slotId', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), updateScheduleSlot);
-router.delete('/:slotId', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), deleteScheduleSlot);
+router.post('/', verifyToken, createScheduleSlot);
+router.get('/:slotId/attendees', verifyToken, getSlotAttendees);
+router.put('/:slotId', verifyToken, updateScheduleSlot);
+router.delete('/:slotId', verifyToken, deleteScheduleSlot);
 
 // Any authenticated user can sign up/down
 router.post('/:slotId/subscriptions', verifyToken, subscribeToSlot);

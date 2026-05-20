@@ -9,8 +9,8 @@ router.get('/', getEvents);
 router.get('/:id', getEventById);
 
 // Protected Organizer/Admin routes
-router.post('/', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), createEvent);
-router.put('/:id', verifyToken, requireRole(['ORGANIZER', 'SUPERADMIN']), updateEvent);
-router.delete('/:id', verifyToken, requireRole(['SUPERADMIN']), deleteEvent);
+router.post('/', verifyToken, createEvent);
+router.put('/:id', verifyToken, updateEvent);
+router.delete('/:id', verifyToken, deleteEvent);
 
 export default router;
