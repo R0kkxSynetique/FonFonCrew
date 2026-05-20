@@ -58,7 +58,12 @@ export const getEvents = async (req, res) => {
             user: { select: { firstname: true, lastname: true } }
           }
         },
-        schedules: true
+        schedules: true,
+        contacts: {
+          include: {
+            user: { select: { id: true, firstname: true, lastname: true, email: true, phone: true } }
+          }
+        }
       },
       orderBy: { startDate: 'asc' }
     });
@@ -82,6 +87,14 @@ export const getEvents = async (req, res) => {
         show_volunteers: event.settings?.showVolunteers ?? false,
         organizer: organizer,
         organizer_id: ownerMember ? ownerMember.userId : null,
+        contacts: event.contacts.map(contact => ({
+          id: contact.id,
+          eventId: contact.eventId,
+          userId: contact.userId,
+          purpose: contact.purpose,
+          contact_info: contact.contactInfo,
+          user: contact.user
+        })),
         schedules: event.schedules.map(slot => ({
           id: slot.id,
           eventId: slot.eventId,
@@ -130,6 +143,11 @@ export const getEventById = async (req, res) => {
               }
             }
           }
+        },
+        contacts: {
+          include: {
+            user: { select: { id: true, firstname: true, lastname: true, email: true, phone: true } }
+          }
         }
       }
     });
@@ -156,6 +174,14 @@ export const getEventById = async (req, res) => {
       show_volunteers: event.settings?.showVolunteers ?? false,
       organizer: organizer,
       organizer_id: ownerMember ? ownerMember.userId : null,
+      contacts: event.contacts.map(contact => ({
+        id: contact.id,
+        eventId: contact.eventId,
+        userId: contact.userId,
+        purpose: contact.purpose,
+        contact_info: contact.contactInfo,
+        user: contact.user
+      })),
       schedules: event.schedules.map(slot => ({
         id: slot.id,
         eventId: slot.eventId,

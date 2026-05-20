@@ -43,6 +43,32 @@ export default function ManageEvent() {
   // Confirmation Modal State
   const [confirmDelete, setConfirmDelete] = useState({ show: false, type: null, id: null, title: '' });
 
+  // Tab State
+  const [activeTab, setActiveTab] = useState('shifts');
+
+  // Contact State
+  const [isAddingContact, setIsAddingContact] = useState(false);
+  const [editingContactId, setEditingContactId] = useState(null);
+  const [contactFormData, setContactFormData] = useState({ user_id: '', purpose: '', contact_info: [] });
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [userSearchResults, setUserSearchResults] = useState([]);
+
+  useEffect(() => {
+    if (userSearchQuery.length >= 2) {
+      const delayFn = setTimeout(async () => {
+        try {
+          const res = await axios.get(`/users/search?q=${userSearchQuery}`);
+          setUserSearchResults(res.data);
+        } catch (err) {
+          console.error('Failed to search users', err);
+        }
+      }, 300);
+      return () => clearTimeout(delayFn);
+    } else {
+      setUserSearchResults([]);
+    }
+  }, [userSearchQuery]);
+
   useEffect(() => {
     fetchEventDetails();
   }, [eventId]);
@@ -50,12 +76,12 @@ export default function ManageEvent() {
   const fetchEventDetails = async () => {
     try {
       const res = await axios.get(`/events/${eventId}`);
-      
+
       const user = JSON.parse(localStorage.getItem('user') || 'null');
       if (res.data.organizer_id !== user.id && user.role !== 'SUPERADMIN') {
-         toast.error(t('manage_event.error_permission'));
-         navigate(`/events/${eventId}`);
-         return;
+        toast.error(t('manage_event.error_permission'));
+        navigate(`/events/${eventId}`);
+        return;
       }
 
       setEvent(res.data);
@@ -67,7 +93,7 @@ export default function ManageEvent() {
         location_name: res.data.location_name || '',
         show_volunteers: res.data.show_volunteers ?? false,
       });
-      
+
       const attendeesData = {};
       if (Array.isArray(res.data.schedules)) {
         for (const slot of res.data.schedules) {
@@ -111,7 +137,7 @@ export default function ManageEvent() {
       if (newStartDate) {
         const startDateObj = new Date(newStartDate);
         const endDateObj = prev.end_date ? new Date(prev.end_date) : null;
-        
+
         if (!prev.end_date || (endDateObj && endDateObj < startDateObj)) {
           startDateObj.setHours(startDateObj.getHours() + 1);
           const tzOffset = startDateObj.getTimezoneOffset() * 60000;
@@ -173,11 +199,48 @@ export default function ManageEvent() {
     setConfirmDelete({ show: true, type, id, title });
   };
 
+  const handleCreateContact = async (e) => {
+    e.preventDefault();
+    if (!contactFormData.user_id) return toast.error('Please select a user');
+    try {
+      await axios.post(`/events/${eventId}/contacts`, contactFormData);
+      setIsAddingContact(false);
+      toast.success('Contact added successfully');
+      fetchEventDetails();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to add contact');
+    }
+  };
+
+  const handleUpdateContact = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`/events/${eventId}/contacts/${editingContactId}`, contactFormData);
+      setEditingContactId(null);
+      toast.success('Contact updated successfully');
+      fetchEventDetails();
+    } catch (err) {
+      toast.error('Failed to update contact');
+    }
+  };
+
+  const handleDeleteContact = async (contactId) => {
+    try {
+      await axios.delete(`/events/${eventId}/contacts/${contactId}`);
+      toast.success('Contact removed successfully');
+      fetchEventDetails();
+    } catch (err) {
+      toast.error('Failed to remove contact');
+    }
+  };
+
   const handleConfirmDelete = () => {
     if (confirmDelete.type === 'event') {
       handleDeleteEvent();
     } else if (confirmDelete.type === 'slot') {
       handleDeleteSlot(confirmDelete.id);
+    } else if (confirmDelete.type === 'contact') {
+      handleDeleteContact(confirmDelete.id);
     }
     setConfirmDelete({ show: false, type: null, id: null, title: '' });
   };
@@ -200,13 +263,13 @@ export default function ManageEvent() {
   };
 
   const openAddSlot = () => {
-    setSlotFormData({ 
-      title: '', 
-      description: '', 
+    setSlotFormData({
+      title: '',
+      description: '',
       location: '',
-      start_time: event ? toLocalDatetimeLocal(event.start_date) : '', 
-      end_time: event ? toLocalDatetimeLocal(event.end_date) : '', 
-      capacity: 5, 
+      start_time: event ? toLocalDatetimeLocal(event.start_date) : '',
+      end_time: event ? toLocalDatetimeLocal(event.end_date) : '',
+      capacity: 5,
       requirements: '',
       buffer_before: 0,
       buffer_after: 0,
@@ -237,17 +300,17 @@ export default function ManageEvent() {
           </button>
         </div>
       </div>
-      
+
       {isEditingEvent ? (
         <form onSubmit={handleUpdateEvent} className="card mb-xl">
           <h2 className="text-2xl font-bold mb-md">{t('manage_event.edit_details')}</h2>
           <div className="form-group">
             <label className="form-label">{t('event_form.name_label')}</label>
-            <input type="text" className="input-field" required value={editEventData.name} onChange={e => setEditEventData({...editEventData, name: e.target.value})} />
+            <input type="text" className="input-field" required value={editEventData.name} onChange={e => setEditEventData({ ...editEventData, name: e.target.value })} />
           </div>
           <div className="form-group">
             <label className="form-label">{t('event_form.desc_label')}</label>
-            <textarea className="input-field" rows="3" value={editEventData.description} onChange={e => setEditEventData({...editEventData, description: e.target.value})}></textarea>
+            <textarea className="input-field" rows="3" value={editEventData.description} onChange={e => setEditEventData({ ...editEventData, description: e.target.value })}></textarea>
           </div>
           <div className="grid grid-cols-2 gap-md flex-responsive">
             <div className="form-group">
@@ -256,19 +319,19 @@ export default function ManageEvent() {
             </div>
             <div className="form-group">
               <label className="form-label">{t('event_form.end_date')}</label>
-              <input type="datetime-local" className="input-field" required value={editEventData.end_date} onChange={e => setEditEventData({...editEventData, end_date: e.target.value})} />
+              <input type="datetime-local" className="input-field" required value={editEventData.end_date} onChange={e => setEditEventData({ ...editEventData, end_date: e.target.value })} />
             </div>
           </div>
           <div className="form-group mb-4">
             <label className="form-label">{t('event_form.location')}</label>
-            <input type="text" className="input-field" value={editEventData.location_name} onChange={e => setEditEventData({...editEventData, location_name: e.target.value})} />
+            <input type="text" className="input-field" value={editEventData.location_name} onChange={e => setEditEventData({ ...editEventData, location_name: e.target.value })} />
           </div>
           <div className="form-group">
             <label className="form-label mb-sm">{t('event_form.volunteer_visibility')}</label>
             <button
               type="button"
               className={`visibility-toggle ${editEventData.show_volunteers ? 'active' : ''}`}
-              onClick={() => setEditEventData({...editEventData, show_volunteers: !editEventData.show_volunteers})}
+              onClick={() => setEditEventData({ ...editEventData, show_volunteers: !editEventData.show_volunteers })}
             >
               {editEventData.show_volunteers ? <Eye size={20} color="var(--success-color)" /> : <EyeOff size={20} color="var(--text-muted)" />}
               <div className="text-left">
@@ -300,97 +363,181 @@ export default function ManageEvent() {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-lg">
-        <h2 className="text-2xl font-bold flex items-center gap-sm">
-          <Users size={24} color="var(--accent-color)" /> {t('manage_event.schedule_slots')}
-        </h2>
-        {!isAddingSlot && (
-          <button onClick={openAddSlot} className="btn btn-primary p-sm">
-            <Plus size={16} /> {t('manage_event.add_slot')}
-          </button>
-        )}
+      <div className="flex gap-sm mb-lg" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+        <button
+          onClick={() => setActiveTab('shifts')}
+          className={`btn ${activeTab === 'shifts' ? 'btn-primary' : ''}`}
+        >
+          {t('manage_event.schedule_slots')}
+        </button>
+        <button
+          onClick={() => setActiveTab('contacts')}
+          className={`btn ${activeTab === 'contacts' ? 'btn-primary' : ''}`}
+        >
+          Contacts
+        </button>
       </div>
 
-      {isAddingSlot && (
-        <SlotForm 
-          onSubmit={handleCreateSlot} 
-          onCancel={() => setIsAddingSlot(false)} 
-          submitText={t('manage_event.create_slot')} 
-          formData={slotFormData}
-          setFormData={setSlotFormData}
-          t={t}
-        />
-      )}
+      {activeTab === 'shifts' && (
+        <>
+          <div className="flex justify-between items-center mb-lg">
+            <h2 className="text-2xl font-bold flex items-center gap-sm">
+              <Users size={24} color="var(--accent-color)" /> {t('manage_event.schedule_slots')}
+            </h2>
+            {!isAddingSlot && (
+              <button onClick={openAddSlot} className="btn btn-primary p-sm">
+                <Plus size={16} /> {t('manage_event.add_slot')}
+              </button>
+            )}
+          </div>
 
-      {event.schedules?.map(slot => (
-        <div key={slot.id}>
-          {editingSlotId === slot.id ? (
-            <SlotForm 
-              onSubmit={handleUpdateSlot} 
-              onCancel={() => setEditingSlotId(null)} 
-              submitText={t('manage_event.save_slot')} 
+          {isAddingSlot && (
+            <SlotForm
+              onSubmit={handleCreateSlot}
+              onCancel={() => setIsAddingSlot(false)}
+              submitText={t('manage_event.create_slot')}
               formData={slotFormData}
               setFormData={setSlotFormData}
               t={t}
             />
-          ) : (
-            <div className="card mb-lg" style={{ borderLeft: '4px solid var(--accent-color)' }}>
+          )}
+
+          {event.schedules?.map(slot => (
+            <div key={slot.id}>
+              {editingSlotId === slot.id ? (
+                <SlotForm
+                  onSubmit={handleUpdateSlot}
+                  onCancel={() => setEditingSlotId(null)}
+                  submitText={t('manage_event.save_slot')}
+                  formData={slotFormData}
+                  setFormData={setSlotFormData}
+                  t={t}
+                />
+              ) : (
+                <div className="card mb-lg" style={{ borderLeft: '4px solid var(--accent-color)' }}>
+                  <div className="flex justify-between items-start mb-md">
+                    <div>
+                      <h3 className="text-xl font-bold">{slot.title}</h3>
+                      <div className="text-sm text-secondary mt-xs">
+                        {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time, t)}
+                      </div>
+                      {(slot.buffer_before > 0 || slot.buffer_after > 0) && (
+                        <div className="text-xs text-muted mt-xs flex items-center gap-xs">
+                          {t('manage_event.preparation')}:
+                          {slot.buffer_before > 0 && <span>+{slot.buffer_before}m {t('manage_event.before')}</span>}
+                          {slot.buffer_after > 0 && <span>+{slot.buffer_after}m {t('manage_event.after')}</span>}
+                          {slot.show_buffer ? <Eye size={12} title="Visible to volunteers" /> : <EyeOff size={12} title="Hidden from volunteers" />}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-md">
+                      <span className="badge">
+                        {t('manage_event.capacity')}: {attendees[slot.id]?.length || 0} / {slot.capacity}
+                      </span>
+                      <div className="flex gap-sm">
+                        <button onClick={() => openEditSlot(slot)} className="btn p-sm" style={{ border: 'none' }} title="Edit Slot"><Edit2 size={16} /></button>
+                        <button onClick={() => triggerDeleteConfirm('slot', slot.id, slot.title)} className="btn btn-danger p-sm" style={{ border: 'none' }} title="Delete Slot"><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {slot.description && <p className="text-sm text-secondary mb-sm" style={{ whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
+                  {slot.requirements && <p className="text-sm text-muted mb-md">Requirements: {slot.requirements}</p>}
+
+                  <div className="p-md" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)' }}>
+                    <h4 className="text-sm font-bold text-secondary mb-sm uppercase" style={{ letterSpacing: '0.05em' }}>
+                      {t('manage_event.subscribed_volunteers')}
+                    </h4>
+
+                    {!attendees[slot.id] || attendees[slot.id].length === 0 ? (
+                      <p className="text-sm text-muted italic">{t('manage_event.no_volunteers')}</p>
+                    ) : (
+                      <div className="grid gap-sm">
+                        {attendees[slot.id]?.map(user => (
+                          <div key={user.id} className="flex justify-between items-center p-sm" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
+                            <div>
+                              <div className="font-medium">{user.firstname} {user.lastname}</div>
+                              <div className="text-xs text-muted">{user.email} {user.phone ? `• ${user.phone}` : ''}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </>
+      )}
+
+      {activeTab === 'contacts' && (
+        <>
+          <div className="flex justify-between items-center mb-lg">
+            <h2 className="text-2xl font-bold flex items-center gap-sm">
+              <Users size={24} color="var(--accent-color)" /> Contacts
+            </h2>
+            {!isAddingContact && (
+              <button onClick={() => { setIsAddingContact(true); setEditingContactId(null); setContactFormData({ user_id: '', purpose: '', contact_info: [] }); setUserSearchQuery(''); }} className="btn btn-primary p-sm">
+                <Plus size={16} /> Add Contact
+              </button>
+            )}
+          </div>
+
+          {(isAddingContact || editingContactId !== null) && (
+            <ContactForm
+              onSubmit={editingContactId !== null ? handleUpdateContact : handleCreateContact}
+              onCancel={() => { setIsAddingContact(false); setEditingContactId(null); }}
+              submitText={editingContactId !== null ? 'Save Contact' : 'Add Contact'}
+              formData={contactFormData}
+              setFormData={setContactFormData}
+              userSearchQuery={userSearchQuery}
+              setUserSearchQuery={setUserSearchQuery}
+              userSearchResults={userSearchResults}
+              isEditing={editingContactId !== null}
+            />
+          )}
+
+          {event.contacts?.map(contact => (
+            <div key={contact.id} className="card mb-lg" style={{ borderLeft: '4px solid var(--primary-color)' }}>
               <div className="flex justify-between items-start mb-md">
                 <div>
-                  <h3 className="text-xl font-bold">{slot.title}</h3>
-                  <div className="text-sm text-secondary mt-xs">
-                    {format(new Date(slot.start_time), 'HH:mm')} - {format(new Date(slot.end_time), 'HH:mm')} {formatDuration(slot.start_time, slot.end_time, t)}
-                  </div>
-                  { (slot.buffer_before > 0 || slot.buffer_after > 0) && (
-                    <div className="text-xs text-muted mt-xs flex items-center gap-xs">
-                      {t('manage_event.preparation')}:
-                      {slot.buffer_before > 0 && <span>+{slot.buffer_before}m {t('manage_event.before')}</span>}
-                      {slot.buffer_after > 0 && <span>+{slot.buffer_after}m {t('manage_event.after')}</span>}
-                      {slot.show_buffer ? <Eye size={12} title="Visible to volunteers" /> : <EyeOff size={12} title="Hidden from volunteers" />}
-                    </div>
-                  )}
+                  <h3 className="text-xl font-bold">{contact.user?.firstname} {contact.user?.lastname}</h3>
+                  <div className="text-md text-primary font-medium mt-xs">{contact.purpose}</div>
                 </div>
-                <div className="flex items-center gap-md">
-                  <span className="badge">
-                    {t('manage_event.capacity')}: {attendees[slot.id]?.length || 0} / {slot.capacity}
-                  </span>
-                  <div className="flex gap-sm">
-                    <button onClick={() => openEditSlot(slot)} className="btn p-sm" style={{ border: 'none' }} title="Edit Slot"><Edit2 size={16} /></button>
-                    <button onClick={() => triggerDeleteConfirm('slot', slot.id, slot.title)} className="btn btn-danger p-sm" style={{ border: 'none' }} title="Delete Slot"><Trash2 size={16} /></button>
-                  </div>
+                <div className="flex gap-sm">
+                  <button onClick={() => {
+                    setContactFormData({ user_id: contact.userId, purpose: contact.purpose, contact_info: contact.contact_info });
+                    setEditingContactId(contact.id);
+                    setIsAddingContact(false);
+                  }} className="btn p-sm" style={{ border: 'none' }} title="Edit"><Edit2 size={16} /></button>
+                  <button onClick={() => triggerDeleteConfirm('contact', contact.id, `${contact.user?.firstname} ${contact.user?.lastname}`)} className="btn btn-danger p-sm" style={{ border: 'none' }} title="Remove"><Trash2 size={16} /></button>
                 </div>
               </div>
-              
-              {slot.description && <p className="text-sm text-secondary mb-sm" style={{ whiteSpace: 'pre-wrap' }}>{slot.description}</p>}
-              {slot.requirements && <p className="text-sm text-muted mb-md">Requirements: {slot.requirements}</p>}
-
-              <div className="p-md" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)' }}>
-                <h4 className="text-sm font-bold text-secondary mb-sm uppercase" style={{ letterSpacing: '0.05em' }}>
-                  {t('manage_event.subscribed_volunteers')}
-                </h4>
-                
-                {!attendees[slot.id] || attendees[slot.id].length === 0 ? (
-                  <p className="text-sm text-muted italic">{t('manage_event.no_volunteers')}</p>
-                ) : (
-                  <div className="grid gap-sm">
-                    {attendees[slot.id]?.map(user => (
-                      <div key={user.id} className="flex justify-between items-center p-sm" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}>
-                        <div>
-                          <div className="font-medium">{user.firstname} {user.lastname}</div>
-                          <div className="text-xs text-muted">{user.email} {user.phone ? `• ${user.phone}` : ''}</div>
-                        </div>
-                      </div>
+              <div className="mt-md">
+                <h4 className="text-sm font-bold text-secondary mb-xs uppercase">Contact Methods</h4>
+                {contact.contact_info?.length > 0 ? (
+                  <ul className="flex flex-col gap-xs mt-sm">
+                    {contact.contact_info.map((info, idx) => (
+                      <li key={idx} className="flex gap-md items-center p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
+                        <span className="font-bold text-sm" style={{ minWidth: '80px' }}>{info.type}</span>
+                        <span className="font-mono text-sm">{info.value}</span>
+                        {info.note && <span className="text-xs text-muted italic ml-md">- {info.note}</span>}
+                      </li>
                     ))}
-                  </div>
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted italic">No contact details provided.</p>
                 )}
               </div>
             </div>
-          )}
-        </div>
-      ))}
-      <ConfirmModal 
-        show={confirmDelete.show} 
-        onClose={() => setConfirmDelete({ show: false, type: null, id: null, title: '' })} 
+          ))}
+        </>
+      )}
+
+      <ConfirmModal
+        show={confirmDelete.show}
+        onClose={() => setConfirmDelete({ show: false, type: null, id: null, title: '' })}
         onConfirm={handleConfirmDelete}
         title={confirmDelete.type === 'event' ? t('manage_event.delete_event') : t('manage_event.delete_slot')}
         message={t('manage_event.confirm_delete_msg', { title: confirmDelete.title })}
@@ -409,7 +556,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData, t }) 
       if (newStartTime) {
         const startDateObj = new Date(newStartTime);
         const endDateObj = prev.end_time ? new Date(prev.end_time) : null;
-        
+
         if (!prev.end_time || (endDateObj && endDateObj < startDateObj)) {
           startDateObj.setHours(startDateObj.getHours() + 1);
           const tzOffset = startDateObj.getTimezoneOffset() * 60000;
@@ -422,126 +569,221 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData, t }) 
 
   return (
     <form onSubmit={onSubmit} className="p-md mb-lg" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-    <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
-      <div>
-        <label className="form-label">{t('event_form.slot_title')}</label>
-        <input 
-          type="text" 
-          className="input-field" 
-          required 
-          value={formData.title} 
-          onChange={e => setFormData({...formData, title: e.target.value})} 
-          placeholder={t('event_form.slot_title_placeholder')} 
-        />
-      </div>
-      <div>
-        <label className="form-label">{t('event_form.slot_desc')}</label>
-        <textarea 
-          className="input-field" 
-          rows="2" 
-          value={formData.description} 
-          onChange={e => setFormData({...formData, description: e.target.value})} 
-          placeholder={t('event_form.slot_desc_placeholder')} 
-        ></textarea>
-      </div>
-    </div>
-
-    <div className="mb-md">
-      <label className="form-label">{t('event_form.onsite_location')}</label>
-      <input 
-        type="text" 
-        className="input-field" 
-        value={formData.location || ''} 
-        onChange={e => setFormData({...formData, location: e.target.value})} 
-        placeholder={t('event_form.onsite_location_placeholder')} 
-      />
-    </div>
-    
-    <div className="grid gap-md mb-sm flex-responsive" style={{ gridTemplateColumns: '1fr 1fr 100px' }}>
-      <div>
-        <label className="form-label">{t('event_form.start_time')}</label>
-        <input 
-          type="datetime-local" 
-          className="input-field" 
-          required 
-          value={formData.start_time} 
-          onChange={handleStartTimeChange} 
-        />
-      </div>
-      <div>
-        <label className="form-label">{t('event_form.end_time')}</label>
-        <input 
-          type="datetime-local" 
-          className="input-field" 
-          required 
-          value={formData.end_time} 
-          onChange={e => setFormData({...formData, end_time: e.target.value})} 
-        />
-      </div>
-      <div>
-        <label className="form-label">{t('event_form.capacity')}</label>
-        <input 
-          type="number" 
-          className="input-field" 
-          required 
-          min="1" 
-          value={formData.capacity} 
-          onChange={e => setFormData({...formData, capacity: parseInt(e.target.value) || 0})} 
-        />
-      </div>
-    </div>
-    <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
-      <div>
-        <label className="form-label">{t('event_form.buffer_before')}</label>
-        <input 
-          type="number" 
-          className="input-field" 
-          min="0" 
-          value={formData.buffer_before} 
-          onChange={e => setFormData({...formData, buffer_before: parseInt(e.target.value) || 0})} 
-          placeholder="e.g. 15" 
-        />
-      </div>
-      <div>
-        <label className="form-label">{t('event_form.buffer_after')}</label>
-        <input 
-          type="number" 
-          className="input-field" 
-          min="0" 
-          value={formData.buffer_after} 
-          onChange={e => setFormData({...formData, buffer_after: parseInt(e.target.value) || 0})} 
-          placeholder="e.g. 15" 
-        />
-      </div>
-    </div>
-
-    <div className="grid grid-cols-2 gap-md mb-sm flex-responsive">
-      <div>
-        <label className="form-label">{t('event_form.requirements')}</label>
-        <input 
-          type="text" 
-          className="input-field" 
-          value={formData.requirements} 
-          onChange={e => setFormData({...formData, requirements: e.target.value})} 
-          placeholder={t('event_form.requirements_placeholder')} 
-        />
-      </div>
-      <div className="flex items-center" style={{ paddingTop: '1.5rem' }}>
-        <label className="form-label flex items-center gap-sm cursor-pointer mb-0">
-          <input 
-            type="checkbox" 
-            checked={formData.show_buffer} 
-            onChange={e => setFormData({...formData, show_buffer: e.target.checked})} 
+      <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
+        <div>
+          <label className="form-label">{t('event_form.slot_title')}</label>
+          <input
+            type="text"
+            className="input-field"
+            required
+            value={formData.title}
+            onChange={e => setFormData({ ...formData, title: e.target.value })}
+            placeholder={t('event_form.slot_title_placeholder')}
           />
-          {t('event_form.show_buffer')}
-        </label>
+        </div>
+        <div>
+          <label className="form-label">{t('event_form.slot_desc')}</label>
+          <textarea
+            className="input-field"
+            rows="2"
+            value={formData.description}
+            onChange={e => setFormData({ ...formData, description: e.target.value })}
+            placeholder={t('event_form.slot_desc_placeholder')}
+          ></textarea>
+        </div>
       </div>
-    </div>
-    <div className="flex gap-sm justify-end">
-      <button type="button" onClick={onCancel} className="btn"><X size={16} /> {t('event_form.cancel')}</button>
-      <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
-    </div>
-  </form>
+
+      <div className="mb-md">
+        <label className="form-label">{t('event_form.onsite_location')}</label>
+        <input
+          type="text"
+          className="input-field"
+          value={formData.location || ''}
+          onChange={e => setFormData({ ...formData, location: e.target.value })}
+          placeholder={t('event_form.onsite_location_placeholder')}
+        />
+      </div>
+
+      <div className="grid gap-md mb-sm flex-responsive" style={{ gridTemplateColumns: '1fr 1fr 100px' }}>
+        <div>
+          <label className="form-label">{t('event_form.start_time')}</label>
+          <input
+            type="datetime-local"
+            className="input-field"
+            required
+            value={formData.start_time}
+            onChange={handleStartTimeChange}
+          />
+        </div>
+        <div>
+          <label className="form-label">{t('event_form.end_time')}</label>
+          <input
+            type="datetime-local"
+            className="input-field"
+            required
+            value={formData.end_time}
+            onChange={e => setFormData({ ...formData, end_time: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="form-label">{t('event_form.capacity')}</label>
+          <input
+            type="number"
+            className="input-field"
+            required
+            min="1"
+            value={formData.capacity}
+            onChange={e => setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-md mb-md flex-responsive">
+        <div>
+          <label className="form-label">{t('event_form.buffer_before')}</label>
+          <input
+            type="number"
+            className="input-field"
+            min="0"
+            value={formData.buffer_before}
+            onChange={e => setFormData({ ...formData, buffer_before: parseInt(e.target.value) || 0 })}
+            placeholder="e.g. 15"
+          />
+        </div>
+        <div>
+          <label className="form-label">{t('event_form.buffer_after')}</label>
+          <input
+            type="number"
+            className="input-field"
+            min="0"
+            value={formData.buffer_after}
+            onChange={e => setFormData({ ...formData, buffer_after: parseInt(e.target.value) || 0 })}
+            placeholder="e.g. 15"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-md mb-sm flex-responsive">
+        <div>
+          <label className="form-label">{t('event_form.requirements')}</label>
+          <input
+            type="text"
+            className="input-field"
+            value={formData.requirements}
+            onChange={e => setFormData({ ...formData, requirements: e.target.value })}
+            placeholder={t('event_form.requirements_placeholder')}
+          />
+        </div>
+        <div className="flex items-center" style={{ paddingTop: '1.5rem' }}>
+          <label className="form-label flex items-center gap-sm cursor-pointer mb-0">
+            <input
+              type="checkbox"
+              checked={formData.show_buffer}
+              onChange={e => setFormData({ ...formData, show_buffer: e.target.checked })}
+            />
+            {t('event_form.show_buffer')}
+          </label>
+        </div>
+      </div>
+      <div className="flex gap-sm justify-end">
+        <button type="button" onClick={onCancel} className="btn"><X size={16} /> {t('event_form.cancel')}</button>
+        <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
+      </div>
+    </form>
+  );
+};
+
+const ContactForm = ({ onSubmit, onCancel, submitText, formData, setFormData, userSearchQuery, setUserSearchQuery, userSearchResults, isEditing }) => {
+  const addContactMethod = () => {
+    setFormData({ ...formData, contact_info: [...formData.contact_info, { type: 'Phone', value: '', note: '' }] });
+  };
+  const removeContactMethod = (index) => {
+    const newInfo = [...formData.contact_info];
+    newInfo.splice(index, 1);
+    setFormData({ ...formData, contact_info: newInfo });
+  };
+  const updateContactMethod = (index, field, value) => {
+    const newInfo = [...formData.contact_info];
+    newInfo[index][field] = value;
+    setFormData({ ...formData, contact_info: newInfo });
+  };
+
+  return (
+    <form onSubmit={onSubmit} className="p-md mb-lg" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+      {!isEditing && (
+        <div className="mb-md">
+          <label className="form-label">Search User by Email or Name</label>
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Type at least 2 characters..."
+            value={userSearchQuery}
+            onChange={(e) => setUserSearchQuery(e.target.value)}
+          />
+          {userSearchResults.length > 0 && !formData.user_id && (
+            <div className="mt-xs p-xs" style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', maxHeight: '150px', overflowY: 'auto' }}>
+              {userSearchResults.map(user => (
+                <div
+                  key={user.id}
+                  className="p-sm cursor-pointer hover:bg-color flex justify-between"
+                  onClick={() => {
+                    setFormData({ ...formData, user_id: user.id });
+                    setUserSearchQuery(`${user.firstname} ${user.lastname} (${user.email})`);
+                    setUserSearchResults([]);
+                  }}
+                >
+                  <span className="font-medium">{user.firstname} {user.lastname}</span>
+                  <span className="text-sm text-secondary">{user.email}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mb-md">
+        <label className="form-label">Purpose / Role</label>
+        <input
+          type="text"
+          className="input-field"
+          required
+          value={formData.purpose}
+          onChange={e => setFormData({ ...formData, purpose: e.target.value })}
+          placeholder="e.g., Medical Staff, Catering..."
+        />
+      </div>
+
+      <div className="mb-md">
+        <div className="flex justify-between items-center mb-sm">
+          <label className="form-label mb-0">Contact Methods</label>
+          <button type="button" onClick={addContactMethod} className="btn p-xs text-sm"><Plus size={14} /> Add Method</button>
+        </div>
+
+        {formData.contact_info.length === 0 ? (
+          <div className="text-sm text-muted italic p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>No contact methods added yet.</div>
+        ) : (
+          <div className="flex flex-col gap-sm">
+            {formData.contact_info.map((info, idx) => (
+              <div key={idx} className="flex gap-sm items-start p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
+                <select className="input-field" style={{ width: '120px' }} value={info.type} onChange={e => updateContactMethod(idx, 'type', e.target.value)}>
+                  <option value="Phone">Phone</option>
+                  <option value="Email">Email</option>
+                  <option value="Radio">Radio</option>
+                  <option value="Other">Other</option>
+                </select>
+                <input type="text" className="input-field" placeholder="Value (e.g. +12345)" required value={info.value} onChange={e => updateContactMethod(idx, 'value', e.target.value)} />
+                <input type="text" className="input-field" placeholder="Note (optional)" value={info.note} onChange={e => updateContactMethod(idx, 'note', e.target.value)} />
+                <button type="button" onClick={() => removeContactMethod(idx)} className="btn btn-danger p-sm" style={{ border: 'none' }}><X size={16} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex gap-sm justify-end mt-md">
+        <button type="button" onClick={onCancel} className="btn"><X size={16} /> Cancel</button>
+        <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
+      </div>
+    </form>
   );
 };
 
@@ -551,10 +793,10 @@ const ConfirmModal = ({ show, onClose, onConfirm, title, message, cancelText, de
   return (
     <div className="modal-overlay">
       <div className="modal-content modal-content-sm text-center">
-        <div className="mx-auto mb-lg flex justify-center items-center" style={{ 
-          width: '64px', 
-          height: '64px', 
-          backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+        <div className="mx-auto mb-lg flex justify-center items-center" style={{
+          width: '64px',
+          height: '64px',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
           borderRadius: '50%'
         }}>
           <Trash2 size={32} color="var(--danger-color)" />

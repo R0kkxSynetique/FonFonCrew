@@ -28,6 +28,9 @@ export default function EventDetails() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [slotToUnsubscribe, setSlotToUnsubscribe] = useState(null);
   const [showVolunteers, setShowVolunteers] = useState(false);
+  
+  // Tab State
+  const [activeTab, setActiveTab] = useState('shifts');
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
@@ -141,10 +144,27 @@ export default function EventDetails() {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-lg flex-wrap gap-md">
-        <h2 className="text-2xl font-bold flex items-center gap-sm" style={{ margin: 0 }}>
-          <Clock size={24} color="var(--accent-color)" /> {t('event_details.available_shifts')}
-        </h2>
+      <div className="flex gap-sm mb-lg" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+        <button 
+          onClick={() => setActiveTab('shifts')} 
+          className={`btn ${activeTab === 'shifts' ? 'btn-primary' : ''}`}
+        >
+          {t('event_details.available_shifts')}
+        </button>
+        <button 
+          onClick={() => setActiveTab('contacts')} 
+          className={`btn ${activeTab === 'contacts' ? 'btn-primary' : ''}`}
+        >
+          Contacts
+        </button>
+      </div>
+
+      {activeTab === 'shifts' && (
+        <>
+          <div className="flex justify-between items-center mb-lg flex-wrap gap-md">
+            <h2 className="text-2xl font-bold flex items-center gap-sm" style={{ margin: 0 }}>
+              <Clock size={24} color="var(--accent-color)" /> {t('event_details.available_shifts')}
+            </h2>
         {(event.show_volunteers || canManage) && (
           <button 
             onClick={() => setShowVolunteers(!showVolunteers)}
@@ -271,6 +291,45 @@ export default function EventDetails() {
           })
         )}
       </div>
+      </>
+      )}
+
+      {activeTab === 'contacts' && (
+        <div className="flex flex-col gap-lg">
+          <div className="flex justify-between items-center mb-md">
+            <h2 className="text-2xl font-bold flex items-center gap-sm" style={{ margin: 0 }}>
+              <Users size={24} color="var(--accent-color)" /> Contacts
+            </h2>
+          </div>
+          {!event.contacts || event.contacts.length === 0 ? (
+            <div className="text-center p-xl" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
+              <p className="text-secondary text-lg">No contact people assigned to this event.</p>
+            </div>
+          ) : (
+            event.contacts.map(contact => (
+              <div key={contact.id} className="card p-lg" style={{ borderLeft: '4px solid var(--primary-color)' }}>
+                <h3 className="text-xl font-bold mb-xs">{contact.user?.firstname} {contact.user?.lastname}</h3>
+                <div className="text-md text-primary font-medium mb-md">{contact.purpose}</div>
+                
+                <h4 className="text-sm font-bold text-secondary mb-sm uppercase">Contact Details</h4>
+                {contact.contact_info?.length > 0 ? (
+                  <ul className="flex flex-col gap-xs mt-sm">
+                    {contact.contact_info.map((info, idx) => (
+                      <li key={idx} className="flex gap-md items-center p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
+                        <span className="font-bold text-sm" style={{ minWidth: '80px' }}>{info.type}</span>
+                        <span className="font-mono text-sm">{info.value}</span>
+                        {info.note && <span className="text-xs text-muted italic ml-md">- {info.note}</span>}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted italic">No contact details provided.</p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {showConfirmModal && (

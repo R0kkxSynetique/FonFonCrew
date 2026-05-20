@@ -34,6 +34,7 @@ model User {
   // Relations
   memberships   EventMembership[]
   subscriptions Subscription[]
+  contacts      EventContact[]
   
   // Timestamps & Soft Delete
   createdAt     DateTime          @default(now())
@@ -60,6 +61,7 @@ model Event {
   // Relations
   members       EventMembership[]
   schedules     ScheduleSlot[]
+  contacts      EventContact[]
   
   // Timestamps & Soft Delete
   createdAt     DateTime          @default(now())
@@ -129,4 +131,22 @@ model Subscription {
   @@index([userId])
   @@index([scheduleSlotId])
   @@map("subscriptions")
+}
+
+model EventContact {
+  id          Int      @id @default(autoincrement())
+  eventId     Int      @map("event_id")
+  userId      Int      @map("user_id")
+  purpose     String   
+  contactInfo Json     @map("contact_info")
+
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@map("event_contacts")
 }
