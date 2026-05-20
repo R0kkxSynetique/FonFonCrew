@@ -155,7 +155,7 @@ export default function EventDetails() {
           onClick={() => setActiveTab('contacts')} 
           className={`btn ${activeTab === 'contacts' ? 'btn-primary' : ''}`}
         >
-          Contacts
+          {t('event_details.contacts_tab')}
         </button>
       </div>
 
@@ -298,12 +298,12 @@ export default function EventDetails() {
         <div className="flex flex-col gap-lg">
           <div className="flex justify-between items-center mb-md">
             <h2 className="text-2xl font-bold flex items-center gap-sm" style={{ margin: 0 }}>
-              <Users size={24} color="var(--accent-color)" /> Contacts
+              <Users size={24} color="var(--accent-color)" /> {t('event_details.contacts_tab')}
             </h2>
           </div>
           {!event.contacts || event.contacts.length === 0 ? (
             <div className="text-center p-xl" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--border-color)' }}>
-              <p className="text-secondary text-lg">No contact people assigned to this event.</p>
+              <p className="text-secondary text-lg">{t('event_details.no_contacts')}</p>
             </div>
           ) : (
             event.contacts.map(contact => (
@@ -311,19 +311,19 @@ export default function EventDetails() {
                 <h3 className="text-xl font-bold mb-xs">{contact.user?.firstname} {contact.user?.lastname}</h3>
                 <div className="text-md text-primary font-medium mb-md">{contact.purpose}</div>
                 
-                <h4 className="text-sm font-bold text-secondary mb-sm uppercase">Contact Details</h4>
+                <h4 className="text-sm font-bold text-secondary mb-sm uppercase">{t('event_details.contact_details')}</h4>
                 {contact.contact_info?.length > 0 ? (
                   <ul className="flex flex-col gap-xs mt-sm">
                     {contact.contact_info.map((info, idx) => (
                       <li key={idx} className="flex gap-md items-center p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
-                        <span className="font-bold text-sm" style={{ minWidth: '80px' }}>{info.type}</span>
+                        <span className="font-bold text-sm" style={{ minWidth: '80px' }}>{t(`manage_event.${info.type.toLowerCase()}`)}</span>
                         <span className="font-mono text-sm">{info.value}</span>
                         {info.note && <span className="text-xs text-muted italic ml-md">- {info.note}</span>}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted italic">No contact details provided.</p>
+                  <p className="text-sm text-muted italic">{t('event_details.no_contact_details')}</p>
                 )}
               </div>
             ))

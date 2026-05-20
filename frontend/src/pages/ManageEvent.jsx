@@ -201,14 +201,14 @@ export default function ManageEvent() {
 
   const handleCreateContact = async (e) => {
     e.preventDefault();
-    if (!contactFormData.user_id) return toast.error('Please select a user');
+    if (!contactFormData.user_id) return toast.error(t('manage_event.select_user_error'));
     try {
       await axios.post(`/events/${eventId}/contacts`, contactFormData);
       setIsAddingContact(false);
-      toast.success('Contact added successfully');
+      toast.success(t('manage_event.success_add_contact'));
       fetchEventDetails();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to add contact');
+      toast.error(err.response?.data?.error || t('manage_event.error_add_contact'));
     }
   };
 
@@ -217,20 +217,20 @@ export default function ManageEvent() {
     try {
       await axios.put(`/events/${eventId}/contacts/${editingContactId}`, contactFormData);
       setEditingContactId(null);
-      toast.success('Contact updated successfully');
+      toast.success(t('manage_event.success_update_contact'));
       fetchEventDetails();
     } catch (err) {
-      toast.error('Failed to update contact');
+      toast.error(t('manage_event.error_update_contact'));
     }
   };
 
   const handleDeleteContact = async (contactId) => {
     try {
       await axios.delete(`/events/${eventId}/contacts/${contactId}`);
-      toast.success('Contact removed successfully');
+      toast.success(t('manage_event.success_remove_contact'));
       fetchEventDetails();
     } catch (err) {
-      toast.error('Failed to remove contact');
+      toast.error(t('manage_event.error_remove_contact'));
     }
   };
 
@@ -374,7 +374,7 @@ export default function ManageEvent() {
           onClick={() => setActiveTab('contacts')}
           className={`btn ${activeTab === 'contacts' ? 'btn-primary' : ''}`}
         >
-          Contacts
+          {t('manage_event.contacts_tab')}
         </button>
       </div>
 
@@ -475,11 +475,11 @@ export default function ManageEvent() {
         <>
           <div className="flex justify-between items-center mb-lg">
             <h2 className="text-2xl font-bold flex items-center gap-sm">
-              <Users size={24} color="var(--accent-color)" /> Contacts
+              <Users size={24} color="var(--accent-color)" /> {t('manage_event.contacts_tab')}
             </h2>
             {!isAddingContact && (
               <button onClick={() => { setIsAddingContact(true); setEditingContactId(null); setContactFormData({ user_id: '', purpose: '', contact_info: [] }); setUserSearchQuery(''); }} className="btn btn-primary p-sm">
-                <Plus size={16} /> Add Contact
+                <Plus size={16} /> {t('manage_event.add_contact')}
               </button>
             )}
           </div>
@@ -488,13 +488,14 @@ export default function ManageEvent() {
             <ContactForm
               onSubmit={editingContactId !== null ? handleUpdateContact : handleCreateContact}
               onCancel={() => { setIsAddingContact(false); setEditingContactId(null); }}
-              submitText={editingContactId !== null ? 'Save Contact' : 'Add Contact'}
+              submitText={editingContactId !== null ? t('manage_event.save_contact') : t('manage_event.add_contact')}
               formData={contactFormData}
               setFormData={setContactFormData}
               userSearchQuery={userSearchQuery}
               setUserSearchQuery={setUserSearchQuery}
               userSearchResults={userSearchResults}
               isEditing={editingContactId !== null}
+              t={t}
             />
           )}
 
@@ -510,24 +511,24 @@ export default function ManageEvent() {
                     setContactFormData({ user_id: contact.userId, purpose: contact.purpose, contact_info: contact.contact_info });
                     setEditingContactId(contact.id);
                     setIsAddingContact(false);
-                  }} className="btn p-sm" style={{ border: 'none' }} title="Edit"><Edit2 size={16} /></button>
-                  <button onClick={() => triggerDeleteConfirm('contact', contact.id, `${contact.user?.firstname} ${contact.user?.lastname}`)} className="btn btn-danger p-sm" style={{ border: 'none' }} title="Remove"><Trash2 size={16} /></button>
+                  }} className="btn p-sm" style={{ border: 'none' }} title={t('manage_event.edit_contact')}><Edit2 size={16} /></button>
+                  <button onClick={() => triggerDeleteConfirm('contact', contact.id, `${contact.user?.firstname} ${contact.user?.lastname}`)} className="btn btn-danger p-sm" style={{ border: 'none' }} title={t('manage_event.delete_contact')}><Trash2 size={16} /></button>
                 </div>
               </div>
               <div className="mt-md">
-                <h4 className="text-sm font-bold text-secondary mb-xs uppercase">Contact Methods</h4>
+                <h4 className="text-sm font-bold text-secondary mb-xs uppercase">{t('manage_event.contact_methods_label')}</h4>
                 {contact.contact_info?.length > 0 ? (
                   <ul className="flex flex-col gap-xs mt-sm">
                     {contact.contact_info.map((info, idx) => (
                       <li key={idx} className="flex gap-md items-center p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
-                        <span className="font-bold text-sm" style={{ minWidth: '80px' }}>{info.type}</span>
+                        <span className="font-bold text-sm" style={{ minWidth: '80px' }}>{t(`manage_event.${info.type.toLowerCase()}`)}</span>
                         <span className="font-mono text-sm">{info.value}</span>
                         {info.note && <span className="text-xs text-muted italic ml-md">- {info.note}</span>}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-sm text-muted italic">No contact details provided.</p>
+                  <p className="text-sm text-muted italic">{t('manage_event.no_contact_details')}</p>
                 )}
               </div>
             </div>
@@ -539,8 +540,8 @@ export default function ManageEvent() {
         show={confirmDelete.show}
         onClose={() => setConfirmDelete({ show: false, type: null, id: null, title: '' })}
         onConfirm={handleConfirmDelete}
-        title={confirmDelete.type === 'event' ? t('manage_event.delete_event') : t('manage_event.delete_slot')}
-        message={t('manage_event.confirm_delete_msg', { title: confirmDelete.title })}
+        title={confirmDelete.type === 'event' ? t('manage_event.delete_event') : confirmDelete.type === 'contact' ? t('manage_event.delete_contact') : t('manage_event.delete_slot')}
+        message={confirmDelete.type === 'contact' ? t('manage_event.confirm_delete_contact_msg', { title: confirmDelete.title }) : t('manage_event.confirm_delete_msg', { title: confirmDelete.title })}
         cancelText={t('event_form.cancel')}
         deleteText={t('manage_event.delete')}
       />
@@ -692,7 +693,7 @@ const SlotForm = ({ onSubmit, onCancel, submitText, formData, setFormData, t }) 
   );
 };
 
-const ContactForm = ({ onSubmit, onCancel, submitText, formData, setFormData, userSearchQuery, setUserSearchQuery, userSearchResults, isEditing }) => {
+const ContactForm = ({ onSubmit, onCancel, submitText, formData, setFormData, userSearchQuery, setUserSearchQuery, userSearchResults, isEditing, t }) => {
   const addContactMethod = () => {
     setFormData({ ...formData, contact_info: [...formData.contact_info, { type: 'Phone', value: '', note: '' }] });
   };
@@ -711,11 +712,11 @@ const ContactForm = ({ onSubmit, onCancel, submitText, formData, setFormData, us
     <form onSubmit={onSubmit} className="p-md mb-lg" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
       {!isEditing && (
         <div className="mb-md">
-          <label className="form-label">Search User by Email or Name</label>
+          <label className="form-label">{t('manage_event.search_user_label')}</label>
           <input
             type="text"
             className="input-field"
-            placeholder="Type at least 2 characters..."
+            placeholder={t('manage_event.search_user_placeholder')}
             value={userSearchQuery}
             onChange={(e) => setUserSearchQuery(e.target.value)}
           />
@@ -741,37 +742,37 @@ const ContactForm = ({ onSubmit, onCancel, submitText, formData, setFormData, us
       )}
 
       <div className="mb-md">
-        <label className="form-label">Purpose / Role</label>
+        <label className="form-label">{t('manage_event.purpose_label')}</label>
         <input
           type="text"
           className="input-field"
           required
           value={formData.purpose}
           onChange={e => setFormData({ ...formData, purpose: e.target.value })}
-          placeholder="e.g., Medical Staff, Catering..."
+          placeholder={t('manage_event.purpose_placeholder')}
         />
       </div>
 
       <div className="mb-md">
         <div className="flex justify-between items-center mb-sm">
-          <label className="form-label mb-0">Contact Methods</label>
-          <button type="button" onClick={addContactMethod} className="btn p-xs text-sm"><Plus size={14} /> Add Method</button>
+          <label className="form-label mb-0">{t('manage_event.contact_methods_label')}</label>
+          <button type="button" onClick={addContactMethod} className="btn p-xs text-sm"><Plus size={14} /> {t('manage_event.add_method')}</button>
         </div>
 
         {formData.contact_info.length === 0 ? (
-          <div className="text-sm text-muted italic p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>No contact methods added yet.</div>
+          <div className="text-sm text-muted italic p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>{t('manage_event.no_contact_methods')}</div>
         ) : (
           <div className="flex flex-col gap-sm">
             {formData.contact_info.map((info, idx) => (
               <div key={idx} className="flex gap-sm items-start p-sm" style={{ backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
                 <select className="input-field" style={{ width: '120px' }} value={info.type} onChange={e => updateContactMethod(idx, 'type', e.target.value)}>
-                  <option value="Phone">Phone</option>
-                  <option value="Email">Email</option>
-                  <option value="Radio">Radio</option>
-                  <option value="Other">Other</option>
+                  <option value="Phone">{t('manage_event.phone')}</option>
+                  <option value="Email">{t('manage_event.email')}</option>
+                  <option value="Radio">{t('manage_event.radio')}</option>
+                  <option value="Other">{t('manage_event.other')}</option>
                 </select>
-                <input type="text" className="input-field" placeholder="Value (e.g. +12345)" required value={info.value} onChange={e => updateContactMethod(idx, 'value', e.target.value)} />
-                <input type="text" className="input-field" placeholder="Note (optional)" value={info.note} onChange={e => updateContactMethod(idx, 'note', e.target.value)} />
+                <input type="text" className="input-field" placeholder={t('manage_event.value_placeholder')} required value={info.value} onChange={e => updateContactMethod(idx, 'value', e.target.value)} />
+                <input type="text" className="input-field" placeholder={t('manage_event.note_placeholder')} value={info.note} onChange={e => updateContactMethod(idx, 'note', e.target.value)} />
                 <button type="button" onClick={() => removeContactMethod(idx)} className="btn btn-danger p-sm" style={{ border: 'none' }}><X size={16} /></button>
               </div>
             ))}
@@ -780,7 +781,7 @@ const ContactForm = ({ onSubmit, onCancel, submitText, formData, setFormData, us
       </div>
 
       <div className="flex gap-sm justify-end mt-md">
-        <button type="button" onClick={onCancel} className="btn"><X size={16} /> Cancel</button>
+        <button type="button" onClick={onCancel} className="btn"><X size={16} /> {t('event_form.cancel')}</button>
         <button type="submit" className="btn btn-primary"><Save size={16} /> {submitText}</button>
       </div>
     </form>
