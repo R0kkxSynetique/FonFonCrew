@@ -13,10 +13,10 @@ RUN npm ci
 COPY --chown=container:container . .
 RUN npx prisma generate
 
-RUN chmod +x entrypoint.sh
 COPY --chown=container:container entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-RUN chown -R 1001:1001 "/home/container/.npm"
+RUN rm -rf /home/container/.npm
 
 USER container
 
