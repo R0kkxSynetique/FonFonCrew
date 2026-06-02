@@ -41,8 +41,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Volunteer App Backend is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  const { address, port } = server.address();
+  const host = address === '::' || address === '0.0.0.0' ? 'localhost' : address;
+  console.log(`Server running on http://${host}:${port}`);
 });
 
 process.on('SIGINT', async () => {
